@@ -24,6 +24,11 @@
 
 namespace local_courseblueprints\privacy;
 
+use core_privacy\local\metadata\collection as metadata_collection;
+use core_privacy\local\metadata\provider as metadata_provider;
+use core_privacy\local\request\core_userlist_provider;
+use core_privacy\local\request\plugin\provider as request_provider;
+
 
 /**
  * Personal-data metadata and system-context export/deletion operations.
@@ -32,11 +37,11 @@ namespace local_courseblueprints\privacy;
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider {
+class provider implements core_userlist_provider, metadata_provider, request_provider {
     /**
      * Describe retained user identity fields.
      */
-    public static function get_metadata(\core_privacy\local\metadata\collection $collection): \core_privacy\local\metadata\collection {
+    public static function get_metadata(metadata_collection $collection): metadata_collection {
         $collection->add_database_table('local_courseblueprints_bp', [
             'ownerid' => 'privacy:metadata:ownerid',
         ], 'privacy:metadata:blueprint');

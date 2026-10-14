@@ -69,7 +69,8 @@ class restore_adapter {
                     $setting = $plan->get_setting($name);
                     $setting->set_value(0);
                 } catch (\base_plan_exception $e) {
-                    // Older Moodle/plugin restore plans may omit optional settings.
+                    // Optional restore settings can be absent across Moodle versions.
+                    continue;
                 }
             }
             if (!$controller->execute_precheck()) {
