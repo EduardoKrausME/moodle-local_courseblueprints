@@ -1,4 +1,4 @@
-@local_courseblueprints
+@local @local_courseblueprints
 Feature: Administrators can see the institutional blueprint catalog
   In order to provision courses consistently
   As a site administrator
