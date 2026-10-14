@@ -1,3 +1,21 @@
+{{!
+    @template local_courseblueprints/comparison
+
+    Institutional course blueprints comparison view.
+
+    Example context (json):
+    {
+        "info": "The report is informative only.",
+        "nodifferences": false,
+        "empty": "No differences",
+        "differences": [
+            {
+                "type": "setting_changed",
+                "detail": "The course format differs"
+            }
+        ]
+    }
+}}
 <p class="alert alert-info">{{info}}</p>
 {{#nodifferences}}<p>{{empty}}</p>{{/nodifferences}}
 {{#differences}}<p><strong>{{type}}</strong>: {{detail}}</p>{{/differences}}

@@ -1,1 +1,15 @@
+{{!
+    @template local_courseblueprints/warnings
+
+    Institutional course blueprints warnings view.
+
+    Example context (json):
+    {
+        "warnings": [
+            {
+                "text": "Some dependencies need review."
+            }
+        ]
+    }
+}}
 {{#warnings}}<p class="alert alert-warning">{{text}}</p>{{/warnings}}

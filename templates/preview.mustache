@@ -1,3 +1,31 @@
+{{!
+    @template local_courseblueprints/preview
+
+    Institutional course blueprints preview view.
+
+    Example context (json):
+    {
+        "title": "Provisioning preview",
+        "hasissues": false,
+        "issues": "",
+        "fullname": "Full name",
+        "shortname": "Short name",
+        "category": "Category",
+        "rows": [
+            {
+                "fullname": "Example course",
+                "shortname": "EXAMPLE",
+                "categoryid": 1,
+                "startdate": "1 Jan 2026",
+                "enddate": "1 Dec 2026"
+            }
+        ],
+        "actionurl": "/local/courseblueprints/provision.php?step=3",
+        "sesskey": "example",
+        "nonce": "example",
+        "confirm": "Confirm"
+    }
+}}
 <div class="local-courseblueprints">
     <h2>{{title}}</h2>
     {{#hasissues}}<p class="alert alert-danger">{{issues}}</p>{{/hasissues}}

@@ -1,3 +1,40 @@
+{{!
+    @template local_courseblueprints/versions
+
+    Institutional course blueprints versions view.
+
+    Example context (json):
+    {
+        "returnurl": "/local/courseblueprints/index.php",
+        "back": "Back",
+        "revision": "Revision",
+        "status": "Status",
+        "dependencies": "Dependencies",
+        "versions": [
+            {
+                "id": 1,
+                "revision": 1,
+                "status": "Draft",
+                "reviewed": false,
+                "hasissues": false,
+                "issues": "",
+                "exporturl": "/local/courseblueprints/export.php?id=1",
+                "export": "Export",
+                "isdraft": true,
+                "canpublish": true,
+                "reviewurl": "/local/courseblueprints/review.php?id=1",
+                "review": "Review",
+                "actionurl": "/local/courseblueprints/versions.php?id=1",
+                "sesskey": "example",
+                "publish": "Publish",
+                "ispublished": false,
+                "cancreate": false,
+                "archive": "Archive",
+                "revisionbutton": "New revision"
+            }
+        ]
+    }
+}}
 <div class="local-courseblueprints">
     <a class="btn btn-link" href="{{{returnurl}}}">{{back}}</a>
     <div class="table-responsive"><table class="table table-striped">

@@ -1,3 +1,28 @@
+{{!
+    @template local_courseblueprints/history
+
+    Institutional course blueprints history view.
+
+    Example context (json):
+    {
+        "fullname": "Full name",
+        "status": "Status",
+        "error": "Error",
+        "rows": [
+            {
+                "fullname": "Course A",
+                "status": "Completed",
+                "error": "",
+                "isrun": false,
+                "hascourse": true,
+                "view": "View",
+                "compare": "Compare",
+                "courseurl": "/course/view.php?id=1",
+                "compareurl": "/local/courseblueprints/compare.php?id=1"
+            }
+        ]
+    }
+}}
 <div class="table-responsive"><table class="table table-striped">
     <thead><tr><th>{{fullname}}</th><th>{{status}}</th><th>{{error}}</th><th></th></tr></thead>
     <tbody>{{#rows}}<tr><td>{{fullname}}</td><td>{{status}}</td><td>{{error}}</td><td>

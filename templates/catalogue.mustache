@@ -1,3 +1,35 @@
+{{!
+    @template local_courseblueprints/catalogue
+
+    Institutional course blueprints catalogue view.
+
+    Example context (json):
+    {
+        "title": "Institutional blueprints",
+        "cancreate": true,
+        "createurl": "/local/courseblueprints/create.php",
+        "createbutton": "Create blueprint",
+        "importurl": "/local/courseblueprints/import.php",
+        "importbutton": "Import",
+        "canprovision": true,
+        "provisionurl": "/local/courseblueprints/provision.php",
+        "provisionbutton": "Provision",
+        "historyurl": "/local/courseblueprints/history.php",
+        "historybutton": "History",
+        "hasblueprints": true,
+        "blueprints": [
+            {
+                "url": "/local/courseblueprints/versions.php?id=1",
+                "name": "Starter course",
+                "code": "STARTER",
+                "description": "Institutional starter course",
+                "revisions": "Revisions",
+                "count": 1
+            }
+        ],
+        "empty": "No blueprints"
+    }
+}}
 <div class="container-fluid local-courseblueprints">
     <nav class="mb-3 d-flex flex-wrap gap-2" aria-label="{{title}}">
         {{#cancreate}}<a class="btn btn-primary" href="{{{createurl}}}">{{createbutton}}</a><a class="btn btn-secondary" href="{{{importurl}}}">{{importbutton}}</a>{{/cancreate}}
