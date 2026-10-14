@@ -24,11 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if ($hassiteconfig) {
-    $ADMIN->add('courses', new admin_externalpage(
-        'local_courseblueprints',
-        get_string('pluginname', 'local_courseblueprints'),
-        new moodle_url('/local/courseblueprints/index.php'),
-        'local/courseblueprints:view'
-    ));
-}
+// The external page has its own capability check; managers need not have site configuration access.
+$ADMIN->add('courses', new admin_externalpage(
+    'local_courseblueprints',
+    get_string('pluginname', 'local_courseblueprints'),
+    new moodle_url('/local/courseblueprints/index.php'),
+    'local/courseblueprints:view'
+));
