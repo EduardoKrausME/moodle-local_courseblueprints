@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes local blueprint repository.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\local;
@@ -41,11 +41,11 @@ class blueprint_repository {
         if ($code === '' || trim($name) === '') {
             throw new \invalid_parameter_exception('Blueprint code and name are required');
         }
-        if ($DB->record_exists('local_cb_blueprint', ['code' => $code])) {
+        if ($DB->record_exists('local_courseblueprints_bp', ['code' => $code])) {
             throw new \moodle_exception('duplicatecode', 'local_courseblueprints');
         }
         $now = time();
-        return $DB->insert_record('local_cb_blueprint', (object) [
+        return $DB->insert_record('local_courseblueprints_bp', (object) [
             'code' => $code, 'name' => trim($name), 'description' => $description,
             'ownerid' => $ownerid, 'timecreated' => $now, 'timemodified' => $now,
         ]);
@@ -54,24 +54,24 @@ class blueprint_repository {
     /** Return only pinned blueprint identity. */
     public function get(int $id): \stdClass {
         global $DB;
-        return $DB->get_record('local_cb_blueprint', ['id' => $id], '*', MUST_EXIST);
+        return $DB->get_record('local_courseblueprints_bp', ['id' => $id], '*', MUST_EXIST);
     }
 
     /** Ordered catalogue. */
     public function catalogue(): array {
         global $DB;
-        return array_values($DB->get_records('local_cb_blueprint', [], 'name ASC, id ASC'));
+        return array_values($DB->get_records('local_courseblueprints_bp', [], 'name ASC, id ASC'));
     }
 
     /** Fetch versions in descending revision order. */
     public function versions(int $blueprintid): array {
         global $DB;
-        return array_values($DB->get_records('local_cb_version', ['blueprintid' => $blueprintid], 'revision DESC'));
+        return array_values($DB->get_records('local_courseblueprints_ver', ['blueprintid' => $blueprintid], 'revision DESC'));
     }
 
     /** Fetch a specific revision. */
     public function version(int $id): \stdClass {
         global $DB;
-        return $DB->get_record('local_cb_version', ['id' => $id], '*', MUST_EXIST);
+        return $DB->get_record('local_courseblueprints_ver', ['id' => $id], '*', MUST_EXIST);
     }
 }

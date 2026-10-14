@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes privacy provider.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\privacy;
@@ -38,14 +38,14 @@ class provider implements \core_privacy\local\metadata\provider,
         \core_privacy\local\request\core_userlist_provider {
     /** Describe retained user identity fields. */
     public static function get_metadata(\core_privacy\local\metadata\collection $collection): \core_privacy\local\metadata\collection {
-        $collection->add_database_table('local_cb_blueprint', [
+        $collection->add_database_table('local_courseblueprints_bp', [
             'ownerid' => 'privacy:metadata:ownerid',
         ], 'privacy:metadata:blueprint');
-        $collection->add_database_table('local_cb_version', [
+        $collection->add_database_table('local_courseblueprints_ver', [
             'authorid' => 'privacy:metadata:authorid', 'reviewerid' => 'privacy:metadata:reviewerid',
             'reviewnotes' => 'privacy:metadata:reviewnotes',
         ], 'privacy:metadata:version');
-        $collection->add_database_table('local_cb_run', [
+        $collection->add_database_table('local_courseblueprints_run', [
             'userid' => 'privacy:metadata:userid',
         ], 'privacy:metadata:run');
         return $collection;
@@ -55,10 +55,10 @@ class provider implements \core_privacy\local\metadata\provider,
     public static function get_contexts_for_userid(int $userid): \core_privacy\local\request\contextlist {
         global $DB;
         $contexts = new \core_privacy\local\request\contextlist();
-        if ($DB->record_exists('local_cb_blueprint', ['ownerid' => $userid]) ||
-                $DB->record_exists('local_cb_version', ['authorid' => $userid]) ||
-                $DB->record_exists('local_cb_version', ['reviewerid' => $userid]) ||
-                $DB->record_exists('local_cb_run', ['userid' => $userid])) {
+        if ($DB->record_exists('local_courseblueprints_bp', ['ownerid' => $userid]) ||
+                $DB->record_exists('local_courseblueprints_ver', ['authorid' => $userid]) ||
+                $DB->record_exists('local_courseblueprints_ver', ['reviewerid' => $userid]) ||
+                $DB->record_exists('local_courseblueprints_run', ['userid' => $userid])) {
             $contexts->add_context(\context_system::instance()->id);
         }
         return $contexts;
@@ -73,9 +73,9 @@ class provider implements \core_privacy\local\metadata\provider,
                 continue;
             }
             $data = (object) [
-                'blueprints' => array_values($DB->get_records('local_cb_blueprint', ['ownerid' => $userid])),
-                'versions' => array_values($DB->get_records('local_cb_version', ['authorid' => $userid])),
-                'runs' => array_values($DB->get_records('local_cb_run', ['userid' => $userid])),
+                'blueprints' => array_values($DB->get_records('local_courseblueprints_bp', ['ownerid' => $userid])),
+                'versions' => array_values($DB->get_records('local_courseblueprints_ver', ['authorid' => $userid])),
+                'runs' => array_values($DB->get_records('local_courseblueprints_run', ['userid' => $userid])),
             ];
             \core_privacy\local\request\writer::with_context($context)->export_data([
                 get_string('pluginname', 'local_courseblueprints')], $data);
@@ -89,9 +89,9 @@ class provider implements \core_privacy\local\metadata\provider,
             return;
         }
         $replacement = (int) get_admin()->id;
-        $DB->execute('UPDATE {local_cb_blueprint} SET ownerid = ?', [$replacement]);
-        $DB->execute('UPDATE {local_cb_version} SET authorid = ?, reviewerid = NULL, reviewnotes = NULL', [$replacement]);
-        $DB->execute('UPDATE {local_cb_run} SET userid = ?', [$replacement]);
+        $DB->execute('UPDATE {local_courseblueprints_bp} SET ownerid = ?', [$replacement]);
+        $DB->execute('UPDATE {local_courseblueprints_ver} SET authorid = ?, reviewerid = NULL, reviewnotes = NULL', [$replacement]);
+        $DB->execute('UPDATE {local_courseblueprints_run} SET userid = ?', [$replacement]);
     }
 
     /** Remove author identity while retaining courses, versions and idempotency records. */
@@ -106,11 +106,11 @@ class provider implements \core_privacy\local\metadata\provider,
             if ($replacement === (int) $userid) {
                 continue;
             }
-            $DB->set_field('local_cb_blueprint', 'ownerid', $replacement, ['ownerid' => $userid]);
-            $DB->set_field('local_cb_version', 'reviewnotes', null, ['authorid' => $userid]);
-            $DB->set_field('local_cb_version', 'authorid', $replacement, ['authorid' => $userid]);
-            $DB->set_field('local_cb_version', 'reviewerid', null, ['reviewerid' => $userid]);
-            $DB->set_field('local_cb_run', 'userid', $replacement, ['userid' => $userid]);
+            $DB->set_field('local_courseblueprints_bp', 'ownerid', $replacement, ['ownerid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'reviewnotes', null, ['authorid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'authorid', $replacement, ['authorid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'reviewerid', null, ['reviewerid' => $userid]);
+            $DB->set_field('local_courseblueprints_run', 'userid', $replacement, ['userid' => $userid]);
         }
     }
 
@@ -121,13 +121,13 @@ class provider implements \core_privacy\local\metadata\provider,
         if ($context->contextlevel !== CONTEXT_SYSTEM) {
             return;
         }
-        foreach (['local_cb_blueprint' => 'ownerid', 'local_cb_version' => 'authorid',
-                'local_cb_run' => 'userid'] as $table => $field) {
+        foreach (['local_courseblueprints_bp' => 'ownerid', 'local_courseblueprints_ver' => 'authorid',
+                'local_courseblueprints_run' => 'userid'] as $table => $field) {
             $sql = "SELECT DISTINCT {$field} FROM {{$table}}";
             $userlist->add_users($DB->get_fieldset_sql($sql));
         }
         $userlist->add_users($DB->get_fieldset_sql(
-            'SELECT DISTINCT reviewerid FROM {local_cb_version} WHERE reviewerid IS NOT NULL'));
+            'SELECT DISTINCT reviewerid FROM {local_courseblueprints_ver} WHERE reviewerid IS NOT NULL'));
     }
 
     /** Erase an approved selection of user identities. */
@@ -141,11 +141,11 @@ class provider implements \core_privacy\local\metadata\provider,
             if ((int) $userid === $replacement) {
                 continue;
             }
-            $DB->set_field('local_cb_blueprint', 'ownerid', $replacement, ['ownerid' => $userid]);
-            $DB->set_field('local_cb_version', 'reviewnotes', null, ['authorid' => $userid]);
-            $DB->set_field('local_cb_version', 'authorid', $replacement, ['authorid' => $userid]);
-            $DB->set_field('local_cb_version', 'reviewerid', null, ['reviewerid' => $userid]);
-            $DB->set_field('local_cb_run', 'userid', $replacement, ['userid' => $userid]);
+            $DB->set_field('local_courseblueprints_bp', 'ownerid', $replacement, ['ownerid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'reviewnotes', null, ['authorid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'authorid', $replacement, ['authorid' => $userid]);
+            $DB->set_field('local_courseblueprints_ver', 'reviewerid', null, ['reviewerid' => $userid]);
+            $DB->set_field('local_courseblueprints_run', 'userid', $replacement, ['userid' => $userid]);
         }
     }
 }

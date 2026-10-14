@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes local execution history.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\local;
@@ -37,12 +37,12 @@ class execution_history {
     /** Fetch run items with independent outcomes. */
     public function items(int $runid): array {
         global $DB;
-        return array_values($DB->get_records('local_cb_item', ['runid' => $runid], 'rownum ASC'));
+        return array_values($DB->get_records('local_courseblueprints_itm', ['runid' => $runid], 'rownum ASC'));
     }
 
     /** Recent runs for audit. */
     public function recent(int $limit = 30): array {
         global $DB;
-        return array_values($DB->get_records('local_cb_run', [], 'timecreated DESC', '*', 0, $limit));
+        return array_values($DB->get_records('local_courseblueprints_run', [], 'timecreated DESC', '*', 0, $limit));
     }
 }

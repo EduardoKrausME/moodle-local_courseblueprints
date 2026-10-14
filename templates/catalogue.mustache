@@ -1,8 +1,8 @@
 <div class="container-fluid local-courseblueprints">
     <nav class="mb-3 d-flex flex-wrap gap-2" aria-label="{{title}}">
-        {{#cancreate}}<a class="btn btn-primary" href="{{createurl}}">{{createbutton}}</a><a class="btn btn-secondary" href="{{importurl}}">{{importbutton}}</a>{{/cancreate}}
-        {{#canprovision}}<a class="btn btn-secondary" href="{{provisionurl}}">{{provisionbutton}}</a>{{/canprovision}}
-        <a class="btn btn-outline-secondary" href="{{historyurl}}">{{historybutton}}</a>
+        {{#cancreate}}<a class="btn btn-primary" href="{{{createurl}}}">{{createbutton}}</a><a class="btn btn-secondary" href="{{{importurl}}}">{{importbutton}}</a>{{/cancreate}}
+        {{#canprovision}}<a class="btn btn-secondary" href="{{{provisionurl}}}">{{provisionbutton}}</a>{{/canprovision}}
+        <a class="btn btn-outline-secondary" href="{{{historyurl}}}">{{historybutton}}</a>
     </nav>
     <h2>{{title}}</h2>
     {{^hasblueprints}}<p>{{empty}}</p>{{/hasblueprints}}
@@ -10,7 +10,7 @@
         {{#blueprints}}
             <article class="col-lg-4 col-md-6 mb-3">
                 <div class="card h-100"><div class="card-body">
-                    <h3 class="h5"><a href="{{url}}">{{name}}</a></h3>
+                    <h3 class="h5"><a href="{{{url}}}">{{name}}</a></h3>
                     <p class="text-muted"><code>{{code}}</code></p>
                     <p>{{description}}</p>
                     <small>{{revisions}}: {{count}}</small>

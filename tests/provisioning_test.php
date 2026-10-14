@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: tests provisioning test.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints;
@@ -56,7 +56,7 @@ class provisioning_test extends \advanced_testcase {
         $first = $service->enqueue($versionid, $targets, $key, $user->id);
         $second = $service->enqueue($versionid, $targets, $key, $user->id);
         $this->assertEquals($first, $second);
-        $this->assertEquals(1, $DB->count_records('local_cb_item', ['runid' => $first]));
+        $this->assertEquals(1, $DB->count_records('local_courseblueprints_itm', ['runid' => $first]));
     }
 
     /** Previously created orphan sentinel is not claimed or created again. */
@@ -78,12 +78,12 @@ class provisioning_test extends \advanced_testcase {
         $run = $service->enqueue($version, [[
             'categoryid' => $category->id, 'fullname' => 'Target', 'shortname' => 'CBRECOVERY',
         ]], hash('sha256', 'crash'), $admin->id);
-        $item = $DB->get_record('local_cb_item', ['runid' => $run], '*', MUST_EXIST);
+        $item = $DB->get_record('local_courseblueprints_itm', ['runid' => $run], '*', MUST_EXIST);
         $existing = $this->getDataGenerator()->create_course([
             'idnumber' => 'cb-' . $item->id, 'shortname' => 'ALREADY-EXISTS',
         ]);
         $service->execute((int) $item->id);
-        $after = $DB->get_record('local_cb_item', ['id' => $item->id], '*', MUST_EXIST);
+        $after = $DB->get_record('local_courseblueprints_itm', ['id' => $item->id], '*', MUST_EXIST);
         $this->assertSame('failed_review', $after->status);
         $this->assertEquals(0, $after->courseid);
         $this->assertTrue($DB->record_exists('course', ['id' => $existing->id]));

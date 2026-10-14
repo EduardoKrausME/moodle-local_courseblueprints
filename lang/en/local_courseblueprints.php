@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Language strings.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['archive'] = 'Archive';
@@ -102,6 +102,7 @@ $string['sourceblank'] = 'Initial configuration';
 $string['sourcecourseid'] = 'Source course ID';
 $string['sourceexisting'] = 'Existing Moodle course';
 $string['sourcemode'] = 'Blueprint source';
+$string['sourcestale'] = 'Source course changed after the revision was captured. Create a new revision and review it.';
 $string['startdate'] = 'Start date';
 $string['status'] = 'Status';
 $string['taskcapture'] = 'Capture blueprint backup';

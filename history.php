@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: history.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../config.php');
@@ -35,7 +35,7 @@ $PAGE->set_heading(get_string('history', 'local_courseblueprints'));
 $history = new \local_courseblueprints\local\execution_history();
 $rows = [];
 if ($id) {
-    $DB->get_record('local_cb_run', ['id' => $id], '*', MUST_EXIST);
+    $DB->get_record('local_courseblueprints_run', ['id' => $id], '*', MUST_EXIST);
     foreach ($history->items($id) as $item) {
         $rows[] = [
             'id' => $item->id, 'fullname' => s($item->fullname),

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes local provisioning service.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\local;
@@ -73,7 +73,7 @@ class provisioning_service {
             $requesthash = hash('sha256', blueprint_version_manager::canonical_json([
                 'versionid' => $versionid, 'targets' => $data,
             ]));
-            $existing = $DB->get_record('local_cb_run', ['requestkey' => $requestkey]);
+            $existing = $DB->get_record('local_courseblueprints_run', ['requestkey' => $requestkey]);
             if ($existing) {
                 if ((int) $existing->versionid !== $versionid || (int) $existing->userid !== $userid ||
                         !hash_equals($existing->requesthash, $requesthash)) {
@@ -92,12 +92,12 @@ class provisioning_service {
                 }
             }
             $transaction = $DB->start_delegated_transaction();
-            $runid = $DB->insert_record('local_cb_run', (object) [
+            $runid = $DB->insert_record('local_courseblueprints_run', (object) [
                 'versionid' => $versionid, 'requestkey' => $requestkey,
                 'requesthash' => $requesthash, 'userid' => $userid, 'timecreated' => time(),
             ]);
             foreach ($data as $i => $target) {
-                $itemid = $DB->insert_record('local_cb_item', (object) array_merge($target, [
+                $itemid = $DB->insert_record('local_courseblueprints_itm', (object) array_merge($target, [
                     'runid' => $runid, 'rownum' => $i, 'versionid' => $versionid,
                     'params' => '{}', 'status' => 'queued', 'attempts' => 0,
                     'timecreated' => time(), 'timemodified' => time(),
@@ -122,7 +122,7 @@ class provisioning_service {
             throw new \moodle_exception('lockfailed', 'local_courseblueprints');
         }
         try {
-            $item = $DB->get_record('local_cb_item', ['id' => $itemid], '*', MUST_EXIST);
+            $item = $DB->get_record('local_courseblueprints_itm', ['id' => $itemid], '*', MUST_EXIST);
             if (in_array($item->status, ['complete', 'needs_review', 'failed_review'], true)) {
                 return;
             }
@@ -130,7 +130,7 @@ class provisioning_service {
             if (!in_array($version->status, ['published', 'archived'], true)) {
                 throw new \moodle_exception('unpublishedversion', 'local_courseblueprints');
             }
-            $run = $DB->get_record('local_cb_run', ['id' => $item->runid], '*', MUST_EXIST);
+            $run = $DB->get_record('local_courseblueprints_run', ['id' => $item->runid], '*', MUST_EXIST);
             $categorycontext = \context_coursecat::instance((int) $item->categoryid);
             if (!has_capability('local/courseblueprints:provision', \context_system::instance(), $run->userid) ||
                     !has_capability('moodle/course:create', $categorycontext, $run->userid)) {
@@ -152,7 +152,7 @@ class provisioning_service {
             }
             $item->attempts++;
             $this->record_status($item, 'processing');
-            $DB->set_field('local_cb_item', 'attempts', $item->attempts, ['id' => $itemid]);
+            $DB->set_field('local_courseblueprints_itm', 'attempts', $item->attempts, ['id' => $itemid]);
             $manifest = json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR);
             if ((new dependency_checker())->check($manifest)) {
                 throw new \moodle_exception('missingdependencies', 'local_courseblueprints');
@@ -171,8 +171,8 @@ class provisioning_service {
                 'groupmode' => (int) ($structure['groupmode'] ?? 0),
             ]);
             // Durable markers before any nontransactional Restore API work.
-            $DB->set_field('local_cb_item', 'courseid', $course->id, ['id' => $itemid]);
-            $DB->insert_record('local_cb_coursemap', (object) [
+            $DB->set_field('local_courseblueprints_itm', 'courseid', $course->id, ['id' => $itemid]);
+            $DB->insert_record('local_courseblueprints_map', (object) [
                 'courseid' => $course->id, 'versionid' => $version->id, 'itemid' => $itemid,
                 'baseline' => $version->structure, 'timecreated' => time(),
             ]);
@@ -189,7 +189,7 @@ class provisioning_service {
                 'visible' => 0, 'idnumber' => $sentinel,
             ]);
             $report = (new course_comparison_service())->compare_course((int) $course->id);
-            $DB->update_record('local_cb_item', (object) [
+            $DB->update_record('local_courseblueprints_itm', (object) [
                 'id' => $itemid, 'status' => empty($report) ? 'complete' : 'needs_review',
                 'validation' => json_encode($report, JSON_THROW_ON_ERROR), 'timemodified' => time(),
             ]);
@@ -200,7 +200,7 @@ class provisioning_service {
             ])->trigger();
         } catch (\Throwable $e) {
             if (isset($item)) {
-                $current = $DB->get_record('local_cb_item', ['id' => $itemid]);
+                $current = $DB->get_record('local_courseblueprints_itm', ['id' => $itemid]);
                 $status = ($current && $current->courseid) ? 'failed_review' : 'queued';
                 $this->record_status($item, $status, 'processing_failed', $e->getMessage());
             }
@@ -234,7 +234,7 @@ class provisioning_service {
     private function record_status(\stdClass $item, string $status, ?string $code = null,
             ?string $message = null): void {
         global $DB;
-        $DB->update_record('local_cb_item', (object) [
+        $DB->update_record('local_courseblueprints_itm', (object) [
             'id' => $item->id, 'status' => $status, 'errorcode' => $code,
             'errormessage' => $message, 'timemodified' => time(),
         ]);

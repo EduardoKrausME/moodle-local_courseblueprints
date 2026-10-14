@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes local blueprint version manager.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\local;
@@ -65,9 +65,9 @@ class blueprint_version_manager {
         }
         try {
             $revision = (int) $DB->get_field_sql(
-                'SELECT MAX(revision) FROM {local_cb_version} WHERE blueprintid = ?', [$blueprintid]);
+                'SELECT MAX(revision) FROM {local_courseblueprints_ver} WHERE blueprintid = ?', [$blueprintid]);
             $payload = ['structure' => $structure, 'manifest' => $manifest];
-            return $DB->insert_record('local_cb_version', (object) [
+            return $DB->insert_record('local_courseblueprints_ver', (object) [
                 'blueprintid' => $blueprintid, 'revision' => $revision + 1,
                 'status' => 'draft', 'authorid' => $authorid,
                 'sourcecourseid' => $sourcecourseid, 'manifest' => self::canonical_json($manifest),
@@ -92,7 +92,7 @@ class blueprint_version_manager {
         if (trim($notes) === '') {
             throw new \invalid_parameter_exception('A human review record is required');
         }
-        $DB->update_record('local_cb_version', (object) [
+        $DB->update_record('local_courseblueprints_ver', (object) [
             'id' => $versionid, 'reviewed' => (int) $approved, 'reviewnotes' => trim($notes),
             'reviewerid' => (int) $USER->id, 'reviewedat' => time(),
         ]);
@@ -126,7 +126,7 @@ class blueprint_version_manager {
         if ($version->sourcecourseid || $version->backuphash) {
             (new backup_adapter())->verify_artifact($version);
         }
-        $DB->update_record('local_cb_version', (object) [
+        $DB->update_record('local_courseblueprints_ver', (object) [
             'id' => $versionid, 'status' => 'published', 'publishedat' => time(),
         ]);
         \local_courseblueprints\event\blueprint_published::create([
@@ -142,6 +142,6 @@ class blueprint_version_manager {
         if ($version->status !== 'published') {
             throw new \moodle_exception('immutableversion', 'local_courseblueprints');
         }
-        $DB->update_record('local_cb_version', (object) ['id' => $versionid, 'status' => 'archived']);
+        $DB->update_record('local_courseblueprints_ver', (object) ['id' => $versionid, 'status' => 'archived']);
     }
 }

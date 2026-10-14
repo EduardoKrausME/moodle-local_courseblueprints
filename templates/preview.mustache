@@ -5,7 +5,7 @@
         <thead><tr><th>{{fullname}}</th><th>{{shortname}}</th><th>{{category}}</th><th>Start</th><th>End</th></tr></thead>
         <tbody>{{#rows}}<tr><td>{{fullname}}</td><td>{{shortname}}</td><td>{{categoryid}}</td><td>{{startdate}}</td><td>{{enddate}}</td></tr>{{/rows}}</tbody>
     </table></div>
-    {{^hasissues}}<form method="post" action="{{actionurl}}">
+    {{^hasissues}}<form method="post" action="{{{actionurl}}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="nonce" value="{{nonce}}">
         <button type="submit" name="action" value="confirm" class="btn btn-primary">{{confirm}}</button>

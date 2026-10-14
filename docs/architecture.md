@@ -12,11 +12,11 @@ This is a Moodle `local_` plugin and not a stand-alone provisioning engine. Mood
 
 ## Database shape
 
-- `local_cb_blueprint`: stable code/name, owner, description.
-- `local_cb_version`: revision number, status, creator, manifests, content fingerprint, backup fingerprint, review evidence and publication timestamp.
-- `local_cb_run`: batch ID, request key, original requester, timestamp.
-- `local_cb_item`: one target per row with category/name/date params, status, retry count, errors, validation report and durable course ID.
-- `local_cb_coursemap`: course ID, pinned version, item ID and original portable baseline.
+- `local_courseblueprints_bp`: stable code/name, owner, description.
+- `local_courseblueprints_ver`: revision number, status, creator, manifests, content fingerprint, backup fingerprint, review evidence and publication timestamp.
+- `local_courseblueprints_run`: batch ID, request key, original requester, timestamp.
+- `local_courseblueprints_itm`: one target per row with category/name/date params, status, retry count, errors, validation report and durable course ID.
+- `local_courseblueprints_map`: course ID, pinned version, item ID and original portable baseline.
 
 A unique `(blueprintid, revision)` index prevents duplicate versions, and a unique `requestkey` plus `(runid, rownum)` prevents duplicate batched rows. A unique `courseid` mapping ensures each provisioned course points to exactly one source revision.
 

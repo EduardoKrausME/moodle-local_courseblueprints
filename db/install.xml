@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/courseblueprints/db" VERSION="2026101400" COMMENT="Course blueprints persistent state" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/courseblueprints/db" VERSION="20261014" COMMENT="Course blueprints persistent state" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
-    <TABLE NAME="local_cb_blueprint" COMMENT="Stable institutional blueprint identities">
+    <TABLE NAME="local_courseblueprints_bp" COMMENT="Stable institutional blueprint identities">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="code" TYPE="char" LENGTH="100" NOTNULL="true"/>
@@ -17,7 +17,7 @@
       </KEYS>
       <INDEXES><INDEX NAME="code" UNIQUE="true" FIELDS="code"/></INDEXES>
     </TABLE>
-    <TABLE NAME="local_cb_version" COMMENT="Immutable published version data">
+    <TABLE NAME="local_courseblueprints_ver" COMMENT="Immutable published version data">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="blueprintid" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -38,12 +38,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="blueprintid" TYPE="foreign" FIELDS="blueprintid" REFTABLE="local_cb_blueprint" REFFIELDS="id"/>
+        <KEY NAME="blueprintid" TYPE="foreign" FIELDS="blueprintid" REFTABLE="local_courseblueprints_bp" REFFIELDS="id"/>
         <KEY NAME="authorid" TYPE="foreign" FIELDS="authorid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES><INDEX NAME="blueprintrevision" UNIQUE="true" FIELDS="blueprintid,revision"/></INDEXES>
     </TABLE>
-    <TABLE NAME="local_cb_run" COMMENT="Batch request and its idempotency key">
+    <TABLE NAME="local_courseblueprints_run" COMMENT="Batch request and its idempotency key">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="versionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -54,12 +54,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_cb_version" REFFIELDS="id"/>
+        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_courseblueprints_ver" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES><INDEX NAME="requestkey" UNIQUE="true" FIELDS="requestkey"/></INDEXES>
     </TABLE>
-    <TABLE NAME="local_cb_item" COMMENT="Individual course provisioning outcomes">
+    <TABLE NAME="local_courseblueprints_itm" COMMENT="Individual course provisioning outcomes">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="runid" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -82,8 +82,8 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="runid" TYPE="foreign" FIELDS="runid" REFTABLE="local_cb_run" REFFIELDS="id"/>
-        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_cb_version" REFFIELDS="id"/>
+        <KEY NAME="runid" TYPE="foreign" FIELDS="runid" REFTABLE="local_courseblueprints_run" REFFIELDS="id"/>
+        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_courseblueprints_ver" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="runrow" UNIQUE="true" FIELDS="runid,rownum"/>
@@ -91,7 +91,7 @@
         <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="local_cb_coursemap" COMMENT="Course links remain pinned to original blueprint revisions">
+    <TABLE NAME="local_courseblueprints_map" COMMENT="Course links remain pinned to original blueprint revisions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -102,8 +102,8 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_cb_version" REFFIELDS="id"/>
-        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_cb_item" REFFIELDS="id"/>
+        <KEY NAME="versionid" TYPE="foreign" FIELDS="versionid" REFTABLE="local_courseblueprints_ver" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_courseblueprints_itm" REFFIELDS="id"/>
       </KEYS>
       <INDEXES><INDEX NAME="courseid" UNIQUE="true" FIELDS="courseid"/></INDEXES>
     </TABLE>

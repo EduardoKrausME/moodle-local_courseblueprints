@@ -37,7 +37,7 @@ Capability checks are server-side; Form API or sesskey validation guards all wri
 
 ## Revision and audit model
 
-`local_cb_blueprint` carries the stable business identity; `local_cb_version` carries revision, immutable structure and dependency manifests, backup SHA-256, author, review evidence, publication timestamp and content SHA-256. `local_cb_run` and `local_cb_item` record a unique request key, independent per-course statuses, errors and course IDs. `local_cb_coursemap` pins each newly provisioned course to exactly one revision with a structural baseline.
+`local_courseblueprints_bp` carries the stable business identity; `local_courseblueprints_ver` carries revision, immutable structure and dependency manifests, backup SHA-256, author, review evidence, publication timestamp and content SHA-256. `local_courseblueprints_run` and `local_courseblueprints_itm` record a unique request key, independent per-course statuses, errors and course IDs. `local_courseblueprints_map` pins each newly provisioned course to exactly one revision with a structural baseline.
 
 A published revision is append-only apart from the status transition to `archived`. Archiving does not delete artifacts or the revision record. There is deliberately **no auto-sync** from a new revision into existing courses.
 

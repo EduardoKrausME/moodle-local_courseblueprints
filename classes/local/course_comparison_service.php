@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Institutional course blueprints: classes local course comparison service.php.
  *
- * @package local_courseblueprints
- * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_courseblueprints
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_courseblueprints\local;
@@ -117,7 +117,7 @@ class course_comparison_service {
     /** Analyze a course against its immutable post-provisioning baseline. */
     public function compare_course(int $courseid): array {
         global $DB;
-        $map = $DB->get_record('local_cb_coursemap', ['courseid' => $courseid], '*', MUST_EXIST);
+        $map = $DB->get_record('local_courseblueprints_map', ['courseid' => $courseid], '*', MUST_EXIST);
         $before = json_decode($map->baseline, true, 512, JSON_THROW_ON_ERROR);
         $actual = (new course_structure_collector())->collect($courseid);
         $version = (new blueprint_repository())->version((int) $map->versionid);

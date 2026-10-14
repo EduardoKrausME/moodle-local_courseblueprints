@@ -1,7 +1,7 @@
 <div class="table-responsive"><table class="table table-striped">
     <thead><tr><th>{{fullname}}</th><th>{{status}}</th><th>{{error}}</th><th></th></tr></thead>
     <tbody>{{#rows}}<tr><td>{{fullname}}</td><td>{{status}}</td><td>{{error}}</td><td>
-        {{#isrun}}<a href="{{courseurl}}">{{view}}</a>{{/isrun}}
-        {{#hascourse}}<a href="{{courseurl}}">{{view}}</a> <a href="{{compareurl}}">{{compare}}</a>{{/hascourse}}
+        {{#isrun}}<a href="{{{courseurl}}}">{{view}}</a>{{/isrun}}
+        {{#hascourse}}<a href="{{{courseurl}}}">{{view}}</a> <a href="{{{compareurl}}}">{{compare}}</a>{{/hascourse}}
     </td></tr>{{/rows}}</tbody>
 </table></div>
