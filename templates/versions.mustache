@@ -1,0 +1,29 @@
+<div class="local-courseblueprints">
+    <a class="btn btn-link" href="{{returnurl}}">{{back}}</a>
+    <div class="table-responsive"><table class="table table-striped">
+        <thead><tr><th>{{revision}}</th><th>{{status}}</th><th>{{dependencies}}</th><th></th></tr></thead>
+        <tbody>{{#versions}}<tr>
+            <td>{{revision}}</td><td>{{status}}{{#reviewed}} ✓{{/reviewed}}</td>
+            <td>{{#hasissues}}<span class="text-danger">{{issues}}</span>{{/hasissues}}{{^hasissues}}OK{{/hasissues}}</td>
+            <td>
+                <a class="btn btn-link" href="{{exporturl}}">{{export}}</a>
+                {{#isdraft}}{{#canpublish}}<a class="btn btn-link" href="{{reviewurl}}">{{review}}</a>
+                <form method="post" action="{{actionurl}}" class="d-inline">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="versionid" value="{{id}}">
+                    <button class="btn btn-outline-primary" type="submit" name="action" value="publish">{{publish}}</button>
+                </form>{{/canpublish}}{{/isdraft}}
+                {{#ispublished}}{{#canpublish}}<form method="post" action="{{actionurl}}" class="d-inline">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="versionid" value="{{id}}">
+                    <button class="btn btn-outline-secondary" type="submit" name="action" value="archive">{{archive}}</button>
+                </form>{{/canpublish}}{{/ispublished}}
+                {{#cancreate}}<form method="post" action="{{actionurl}}" class="d-inline">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="versionid" value="{{id}}">
+                    <button class="btn btn-outline-secondary" type="submit" name="action" value="revision">{{revisionbutton}}</button>
+                </form>{{/cancreate}}
+            </td>
+        </tr>{{/versions}}</tbody>
+    </table></div>
+</div>
