@@ -3,9 +3,12 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -15,49 +18,57 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: moodle
-          POSTGRES_PASSWORD: moodle
-          POSTGRES_DB: moodle
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U moodle"
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - name: Check out plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+          persist-credentials: false
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: intl, zip, pgsql, gd, soap, mbstring, xml
           tools: composer:v2
+          ini-values: max_input_vars=5000, opcache.enable_cli=1
+          coverage: none
       - name: PHP lint
-        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find plugin -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Install validator
         run: git clone --depth=1 https://github.com/EduardoKrausME/moodle-plugin-validate /tmp/moodle-plugin-validate
       - name: Validate and verify canonical formatting
         run: |
-          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py "$GITHUB_WORKSPACE"
-          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py --check "$GITHUB_WORKSPACE"
-          git diff --exit-code
+          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py "$GITHUB_WORKSPACE/plugin"
+          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py --check "$GITHUB_WORKSPACE/plugin"
+          git -C plugin diff --exit-code
       - name: Install Moodle Plugin CI
-        run: composer global require moodlehq/moodle-plugin-ci
+        run: |
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci '^4'
+          echo "$GITHUB_WORKSPACE/ci/bin" >> "$GITHUB_PATH"
+          echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=$HOME/.nvm" >> "$GITHUB_ENV"
       - name: Install Moodle for tests
         env:
           DB: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_USER: moodle
-          DB_PASS: moodle
-          DB_NAME: moodle
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-        run: |
-          echo "$HOME/.composer/vendor/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.config/composer/vendor/bin" >> "$GITHUB_PATH"
-          "$HOME/.config/composer/vendor/bin/moodle-plugin-ci" install -vvv
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
       - name: Moodle Code Checker
-        run: moodle-plugin-ci codechecker
+        run: moodle-plugin-ci phpcs --max-warnings 0
+      - name: Moodle plugin validation
+        run: moodle-plugin-ci validate
+      - name: Mustache lint
+        run: moodle-plugin-ci mustache
       - name: PHPUnit
         run: moodle-plugin-ci phpunit --fail-on-warning
       - name: Behat
-        run: moodle-plugin-ci behat
+        run: moodle-plugin-ci behat --profile chrome
