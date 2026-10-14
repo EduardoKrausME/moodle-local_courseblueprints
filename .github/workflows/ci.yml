@@ -57,6 +57,24 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> "$GITHUB_ENV"
+      - name: Export PHP code style fixes
+        if: matrix.moodle-branch == 'MOODLE_405_STABLE' && matrix.php == '8.2'
+        run: |
+          moodle-plugin-ci phpcbf ./plugin > /tmp/local-courseblueprints-phpcbf.log 2>&1 || true
+          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py ./plugin > /tmp/local-courseblueprints-normalize.log
+          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py --check ./plugin > /tmp/local-courseblueprints-verify.log
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          import base64
+          import subprocess
+          root = Path('plugin')
+          files = subprocess.check_output(['git', '-C', str(root), 'diff', '--name-only'], text=True).splitlines()
+          print('FORMAT_EXPORT_BEGIN', flush=True)
+          for name in files:
+              data = (root / name).read_bytes()
+              print('FORMAT_FILE ' + name + ' ' + base64.b64encode(data).decode('ascii'), flush=True)
+          print('FORMAT_EXPORT_END', flush=True)
+          PYTHON
       - name: Install Moodle for tests
         env:
           DB: pgsql
