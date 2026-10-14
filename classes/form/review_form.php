@@ -35,15 +35,21 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class review_form extends \moodleform {
-    /** Form API definition. */
+    /**
+     * Form API definition.
+     */
     protected function definition(): void {
         $mform = $this->_form;
         $mform->addElement('hidden', 'versionid', $this->_customdata['versionid']);
         $mform->setType('versionid', PARAM_INT);
         $mform->addElement('advcheckbox', 'reviewed', get_string('reviewed', 'local_courseblueprints'));
         $mform->addRule('reviewed', null, 'required');
-        $mform->addElement('textarea', 'reviewnotes', get_string('reviewnotes', 'local_courseblueprints'),
-            ['rows' => 5, 'cols' => 75]);
+        $mform->addElement(
+            'textarea',
+            'reviewnotes',
+            get_string('reviewnotes', 'local_courseblueprints'),
+            ['rows' => 5, 'cols' => 75]
+        );
         $mform->setType('reviewnotes', PARAM_TEXT);
         $mform->addRule('reviewnotes', null, 'required');
         $this->add_action_buttons(true, get_string('savereview', 'local_courseblueprints'));

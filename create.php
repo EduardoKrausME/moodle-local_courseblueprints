@@ -54,14 +54,21 @@ if ($data = $form->get_data()) {
     $repo = new \local_courseblueprints\local\blueprint_repository();
     $id = $repo->create($data->code, $data->name, $data->description, $USER->id);
     $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
-        $id, $USER->id, $structure, $manifest, $sourceid);
+        $id,
+        $USER->id,
+        $structure,
+        $manifest,
+        $sourceid
+    );
     if ($sourceid) {
         $task = new \local_courseblueprints\task\capture_blueprint_task();
         $task->set_custom_data(['versionid' => $versionid, 'userid' => $USER->id]);
         \core\task\manager::queue_adhoc_task($task, true);
     }
-    redirect(new moodle_url('/local/courseblueprints/versions.php', ['id' => $id]),
-        get_string('createddraft', 'local_courseblueprints'));
+    redirect(
+        new moodle_url('/local/courseblueprints/versions.php', ['id' => $id]),
+        get_string('createddraft', 'local_courseblueprints')
+    );
 }
 
 echo $OUTPUT->header();

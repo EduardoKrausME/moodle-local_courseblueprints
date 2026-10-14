@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Parameterization and idempotent queuing tests.
@@ -32,9 +31,12 @@ defined('MOODLE_INTERNAL') || die();
  * @package local_courseblueprints
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_courseblueprints\local\provisioning_service
  */
-class provisioning_test extends \advanced_testcase {
-    /** Repeated batch request must return the existing run ID without duplicating rows. */
+final class provisioning_test extends \advanced_testcase {
+    /**
+     * Repeated batch request must return the existing run ID without duplicating rows.
+     */
     public function test_idempotent_batch_request(): void {
         global $DB;
         $this->resetAfterTest();
@@ -59,7 +61,9 @@ class provisioning_test extends \advanced_testcase {
         $this->assertEquals(1, $DB->count_records('local_courseblueprints_itm', ['runid' => $first]));
     }
 
-    /** Previously created orphan sentinel is not claimed or created again. */
+    /**
+     * Previously created orphan sentinel is not claimed or created again.
+     */
     public function test_orphan_after_crash_requires_manual_review(): void {
         global $DB;
         $this->resetAfterTest();
@@ -89,7 +93,9 @@ class provisioning_test extends \advanced_testcase {
         $this->assertTrue($DB->record_exists('course', ['id' => $existing->id]));
     }
 
-    /** Validate dates and course names before scheduling tasks. */
+    /**
+     * Validate dates and course names before scheduling tasks.
+     */
     public function test_invalid_parameterization_rejected(): void {
         $this->expectException(\invalid_parameter_exception::class);
         (new \local_courseblueprints\local\provisioning_service())->normalize([

@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\event;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * A provisioned course has a persistent original template revision.
@@ -34,25 +33,39 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_provisioned extends \core\event\base {
-    /** Setup common audit metadata. */
+    /**
+     * Setup common audit metadata.
+     */
     protected function init(): void {
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_OTHER;
         $this->data['objecttable'] = 'course';
     }
 
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public static function get_name(): string {
         return get_string('eventprovisioned', 'local_courseblueprints');
     }
 
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public function get_description(): string {
         return 'User ' . $this->userid . ' provisioned course ' . $this->objectid .
             ' from blueprint version ' . $this->other['versionid'] . '.';
     }
 
-    /** @return \moodle_url */
+    /**
+     * Return the requested value.
+     *
+     * @return \moodle_url
+     */
     public function get_url(): \moodle_url {
         return new \moodle_url('/course/view.php', ['id' => $this->objectid]);
     }

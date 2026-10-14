@@ -67,7 +67,11 @@ if ($data = $form->get_data()) {
         $repo = new \local_courseblueprints\local\blueprint_repository();
         $blueprintid = $repo->create($data->code, $data->name, 'Imported blueprint', $USER->id);
         $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
-            $blueprintid, $USER->id, $document['structure'], $document['manifest']);
+            $blueprintid,
+            $USER->id,
+            $document['structure'],
+            $document['manifest']
+        );
         if ($tmpfile) {
             get_file_storage()->create_file_from_pathname([
                 'contextid' => context_system::instance()->id,
@@ -77,8 +81,10 @@ if ($data = $form->get_data()) {
             ], $tmpfile);
             $DB->set_field('local_courseblueprints_ver', 'backuphash', $document['backuphash'], ['id' => $versionid]);
         }
-        redirect(new moodle_url('/local/courseblueprints/versions.php', ['id' => $blueprintid]),
-            get_string('createddraft', 'local_courseblueprints'));
+        redirect(
+            new moodle_url('/local/courseblueprints/versions.php', ['id' => $blueprintid]),
+            get_string('createddraft', 'local_courseblueprints')
+        );
     } finally {
         if ($tmpfile && is_file($tmpfile)) {
             unlink($tmpfile);

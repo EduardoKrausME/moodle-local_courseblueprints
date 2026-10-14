@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\task;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Async single-course provisioning worker.
@@ -34,12 +33,18 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provision_course_task extends \core\task\adhoc_task {
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public function get_name(): string {
         return get_string('taskprovision', 'local_courseblueprints');
     }
 
-    /** Execute one idempotent provision operation. */
+    /**
+     * Execute one idempotent provision operation.
+     */
     public function execute(): void {
         $data = $this->get_custom_data();
         (new \local_courseblueprints\local\provisioning_service())->execute((int) $data->itemid);

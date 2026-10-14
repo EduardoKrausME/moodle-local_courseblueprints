@@ -35,7 +35,9 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class blueprint_form extends \moodleform {
-    /** Form API definition. */
+    /**
+     * Form API definition.
+     */
     protected function definition(): void {
         $mform = $this->_form;
         $mform->addElement('text', 'code', get_string('code', 'local_courseblueprints'));
@@ -64,7 +66,9 @@ class blueprint_form extends \moodleform {
         $this->add_action_buttons(true, get_string('createblueprint', 'local_courseblueprints'));
     }
 
-    /** Validate source course access and bounds. */
+    /**
+     * Validate source course access and bounds.
+     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
         if ($data['mode'] === 'existing') {

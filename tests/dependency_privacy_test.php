@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Dependency, sanitization and portability checks.
@@ -32,9 +31,14 @@ defined('MOODLE_INTERNAL') || die();
  * @package local_courseblueprints
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_courseblueprints\local\dependency_checker
+ * @covers \local_courseblueprints\local\privacy_guard
+ * @covers \local_courseblueprints\local\import_export_validator
  */
-class dependency_privacy_test extends \advanced_testcase {
-    /** A missing module or unrecognized format is a publication blocker. */
+final class dependency_privacy_test extends \advanced_testcase {
+    /**
+     * A missing module or unrecognized format is a publication blocker.
+     */
     public function test_missing_dependencies_are_visible(): void {
         $checker = new \local_courseblueprints\local\dependency_checker();
         $issues = $checker->check(['schema' => 1, 'requires' => ['mod_impossiblecourseblueprintxyz'],
@@ -43,7 +47,9 @@ class dependency_privacy_test extends \advanced_testcase {
         $this->assertContains('unsupported:resource:personal_data', $issues);
     }
 
-    /** Identifiable information in section-authored text blocks publication. */
+    /**
+     * Identifiable information in section-authored text blocks publication.
+     */
     public function test_pii_heuristics_identify_email_and_cpf(): void {
         $guard = new \local_courseblueprints\local\privacy_guard();
         $found = $guard->inspect(['sections' => [['number' => 1,
@@ -52,7 +58,9 @@ class dependency_privacy_test extends \advanced_testcase {
         $this->assertContains('cpf:section:1', $found);
     }
 
-    /** An export with activity definitions but no archive is not silently treated as empty. */
+    /**
+     * An export with activity definitions but no archive is not silently treated as empty.
+     */
     public function test_import_requires_archive_for_activities(): void {
         $structure = ['format' => 'topics', 'sections' => [],
             'activities' => [['section' => 1, 'modname' => 'forum', 'name' => 'Test']]];
@@ -65,7 +73,9 @@ class dependency_privacy_test extends \advanced_testcase {
         $this->assertContains('activities_without_backup', $issues);
     }
 
-    /** JSON with tampered content is rejected, even if manifest remains valid. */
+    /**
+     * JSON with tampered content is rejected, even if manifest remains valid.
+     */
     public function test_import_catches_manifest_tampering(): void {
         $validator = new \local_courseblueprints\local\import_export_validator();
         $issues = $validator->validate([

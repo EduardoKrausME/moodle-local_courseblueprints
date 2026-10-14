@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Resumable, lock-protected provisioning. Existing courses are never deleted.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provisioning_service {
-    /** Parameter whitelist; no arbitrary course settings can be injected. */
+    /**
+     * Parameter whitelist; no arbitrary course settings can be injected.
+     */
     public function normalize(array $input): array {
         $data = [
             'categoryid' => (int) ($input['categoryid'] ?? 0),
@@ -43,15 +44,19 @@ class provisioning_service {
             'startdate' => max(0, (int) ($input['startdate'] ?? 0)),
             'enddate' => max(0, (int) ($input['enddate'] ?? 0)),
         ];
-        if (!$data['categoryid'] || !$data['fullname'] || !$data['shortname'] ||
+        if (
+            !$data['categoryid'] || !$data['fullname'] || !$data['shortname'] ||
                 \core\text::strlen($data['fullname']) > 254 || \core\text::strlen($data['shortname']) > 254 ||
-                ($data['enddate'] && $data['startdate'] > $data['enddate'])) {
+                ($data['enddate'] && $data['startdate'] > $data['enddate'])
+        ) {
             throw new \invalid_parameter_exception('Invalid provisioning parameters');
         }
         return $data;
     }
 
-    /** Build one batch with exactly one row per target; requestkey protects retries. */
+    /**
+     * Build one batch with exactly one row per target; requestkey protects retries.
+     */
     public function enqueue(int $versionid, array $targets, string $requestkey, int $userid): int {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);
@@ -75,16 +80,20 @@ class provisioning_service {
             ]));
             $existing = $DB->get_record('local_courseblueprints_run', ['requestkey' => $requestkey]);
             if ($existing) {
-                if ((int) $existing->versionid !== $versionid || (int) $existing->userid !== $userid ||
-                        !hash_equals($existing->requesthash, $requesthash)) {
+                if (
+                    (int) $existing->versionid !== $versionid || (int) $existing->userid !== $userid ||
+                        !hash_equals($existing->requesthash, $requesthash)
+                ) {
                     throw new \moodle_exception('idempotencyconflict', 'local_courseblueprints');
                 }
                 return (int) $existing->id;
             }
             foreach ($data as $target) {
                 $context = \context_coursecat::instance($target['categoryid']);
-                if (!has_capability('local/courseblueprints:provision', \context_system::instance(), $userid) ||
-                        !has_capability('moodle/course:create', $context, $userid)) {
+                if (
+                    !has_capability('local/courseblueprints:provision', \context_system::instance(), $userid) ||
+                        !has_capability('moodle/course:create', $context, $userid)
+                ) {
                     throw new \required_capability_exception($context, 'moodle/course:create', 'nopermissions', '');
                 }
                 if ($DB->record_exists('course', ['shortname' => $target['shortname']])) {
@@ -113,7 +122,9 @@ class provisioning_service {
         }
     }
 
-    /** Process a single request; a prior partially created course becomes manual review. */
+    /**
+     * Process a single request; a prior partially created course becomes manual review.
+     */
     public function execute(int $itemid): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
@@ -132,22 +143,36 @@ class provisioning_service {
             }
             $run = $DB->get_record('local_courseblueprints_run', ['id' => $item->runid], '*', MUST_EXIST);
             $categorycontext = \context_coursecat::instance((int) $item->categoryid);
-            if (!has_capability('local/courseblueprints:provision', \context_system::instance(), $run->userid) ||
-                    !has_capability('moodle/course:create', $categorycontext, $run->userid)) {
-                throw new \required_capability_exception($categorycontext,
-                    'moodle/course:create', 'nopermissions', '');
+            if (
+                !has_capability('local/courseblueprints:provision', \context_system::instance(), $run->userid) ||
+                    !has_capability('moodle/course:create', $categorycontext, $run->userid)
+            ) {
+                throw new \required_capability_exception(
+                    $categorycontext,
+                    'moodle/course:create',
+                    'nopermissions',
+                    ''
+                );
             }
             if ($item->courseid) {
                 // A restore may have failed midway. Never run it again on this course.
-                $this->record_status($item, 'failed_review', 'partial_course',
-                    'Existing provisioned course requires manual review; automatic restore disabled');
+                $this->record_status(
+                    $item,
+                    'failed_review',
+                    'partial_course',
+                    'Existing provisioned course requires manual review; automatic restore disabled'
+                );
                 return;
             }
             // Sentinel makes a post-create crash detectable without creating a second course.
             $sentinel = 'cb-' . $itemid;
             if ($DB->record_exists('course', ['idnumber' => $sentinel])) {
-                $this->record_status($item, 'failed_review', 'orphan_detected',
-                    'A course with this provisioning sentinel already exists; reconcile manually');
+                $this->record_status(
+                    $item,
+                    'failed_review',
+                    'orphan_detected',
+                    'A course with this provisioning sentinel already exists; reconcile manually'
+                );
                 return;
             }
             $item->attempts++;
@@ -210,11 +235,13 @@ class provisioning_service {
         }
     }
 
-    /** Create empty sections via the Moodle course API. */
+    /**
+     * Create empty sections via the Moodle course API.
+     */
     private function create_sections(\stdClass $course, array $structure): void {
         global $DB;
         $numbers = array_column($structure['sections'] ?? [], 'number');
-        $numbers = array_filter(array_map('intval', $numbers), static function(int $number): bool {
+        $numbers = array_filter(array_map('intval', $numbers), static function (int $number): bool {
             return $number > 0 && $number <= 52;
         });
         if ($numbers) {
@@ -230,9 +257,15 @@ class provisioning_service {
         }
     }
 
-    /** Persist an individual outcome, without deleting course data on failure. */
-    private function record_status(\stdClass $item, string $status, ?string $code = null,
-            ?string $message = null): void {
+    /**
+     * Persist an individual outcome, without deleting course data on failure.
+     */
+    private function record_status(
+        \stdClass $item,
+        string $status,
+        ?string $code = null,
+        ?string $message = null
+    ): void {
         global $DB;
         $DB->update_record('local_courseblueprints_itm', (object) [
             'id' => $item->id, 'status' => $status, 'errorcode' => $code,

@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Conservative detection of PII embedded in course-authored HTML.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class privacy_guard {
-    /** Find possible PII (heuristics; explicit expert review remains compulsory). */
+    /**
+     * Find possible PII (heuristics; explicit expert review remains compulsory).
+     */
     public function inspect(array $structure): array {
         $issues = [];
         foreach ($structure['sections'] ?? [] as $section) {

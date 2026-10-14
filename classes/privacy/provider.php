@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\privacy;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Personal-data metadata and system-context export/deletion operations.
@@ -33,10 +32,10 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\plugin\provider,
-        \core_privacy\local\request\core_userlist_provider {
-    /** Describe retained user identity fields. */
+class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider {
+    /**
+     * Describe retained user identity fields.
+     */
     public static function get_metadata(\core_privacy\local\metadata\collection $collection): \core_privacy\local\metadata\collection {
         $collection->add_database_table('local_courseblueprints_bp', [
             'ownerid' => 'privacy:metadata:ownerid',
@@ -51,20 +50,26 @@ class provider implements \core_privacy\local\metadata\provider,
         return $collection;
     }
 
-    /** Data is attached only to site-level administrator operations. */
+    /**
+     * Data is attached only to site-level administrator operations.
+     */
     public static function get_contexts_for_userid(int $userid): \core_privacy\local\request\contextlist {
         global $DB;
         $contexts = new \core_privacy\local\request\contextlist();
-        if ($DB->record_exists('local_courseblueprints_bp', ['ownerid' => $userid]) ||
+        if (
+            $DB->record_exists('local_courseblueprints_bp', ['ownerid' => $userid]) ||
                 $DB->record_exists('local_courseblueprints_ver', ['authorid' => $userid]) ||
                 $DB->record_exists('local_courseblueprints_ver', ['reviewerid' => $userid]) ||
-                $DB->record_exists('local_courseblueprints_run', ['userid' => $userid])) {
+                $DB->record_exists('local_courseblueprints_run', ['userid' => $userid])
+        ) {
             $contexts->add_context(\context_system::instance()->id);
         }
         return $contexts;
     }
 
-    /** Export only the requesting user's authorship and operations. */
+    /**
+     * Export only the requesting user's authorship and operations.
+     */
     public static function export_user_data(\core_privacy\local\request\approved_contextlist $contextlist): void {
         global $DB;
         $userid = $contextlist->get_user()->id;
@@ -82,7 +87,9 @@ class provider implements \core_privacy\local\metadata\provider,
         }
     }
 
-    /** Site-wide privacy erasure may remove institutional audit ownership. */
+    /**
+     * Site-wide privacy erasure may remove institutional audit ownership.
+     */
     public static function delete_data_for_all_users_in_context(\context $context): void {
         global $DB;
         if ($context->contextlevel !== CONTEXT_SYSTEM) {
@@ -94,7 +101,9 @@ class provider implements \core_privacy\local\metadata\provider,
         $DB->execute('UPDATE {local_courseblueprints_run} SET userid = ?', [$replacement]);
     }
 
-    /** Remove author identity while retaining courses, versions and idempotency records. */
+    /**
+     * Remove author identity while retaining courses, versions and idempotency records.
+     */
     public static function delete_data_for_user(\core_privacy\local\request\approved_contextlist $contextlist): void {
         global $DB;
         $userid = $contextlist->get_user()->id;
@@ -114,23 +123,30 @@ class provider implements \core_privacy\local\metadata\provider,
         }
     }
 
-    /** Add users referenced in institutional history to the privacy request. */
+    /**
+     * Add users referenced in institutional history to the privacy request.
+     */
     public static function get_users_in_context(\core_privacy\local\request\userlist $userlist): void {
         global $DB;
         $context = $userlist->get_context();
         if ($context->contextlevel !== CONTEXT_SYSTEM) {
             return;
         }
-        foreach (['local_courseblueprints_bp' => 'ownerid', 'local_courseblueprints_ver' => 'authorid',
-                'local_courseblueprints_run' => 'userid'] as $table => $field) {
+        foreach (
+            ['local_courseblueprints_bp' => 'ownerid', 'local_courseblueprints_ver' => 'authorid',
+                'local_courseblueprints_run' => 'userid'] as $table => $field
+        ) {
             $sql = "SELECT DISTINCT {$field} FROM {{$table}}";
             $userlist->add_users($DB->get_fieldset_sql($sql));
         }
         $userlist->add_users($DB->get_fieldset_sql(
-            'SELECT DISTINCT reviewerid FROM {local_courseblueprints_ver} WHERE reviewerid IS NOT NULL'));
+            'SELECT DISTINCT reviewerid FROM {local_courseblueprints_ver} WHERE reviewerid IS NOT NULL'
+        ));
     }
 
-    /** Erase an approved selection of user identities. */
+    /**
+     * Erase an approved selection of user identities.
+     */
     public static function delete_data_for_users(\core_privacy\local\request\approved_userlist $userlist): void {
         global $DB;
         if ($userlist->get_context()->contextlevel !== CONTEXT_SYSTEM) {

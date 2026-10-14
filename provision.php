@@ -42,11 +42,17 @@ if ($step === 3 && optional_param('action', '', PARAM_ALPHA) === 'confirm') {
     if (!$draft || !hash_equals($draft['nonce'], $nonce) || $draft['userid'] != $USER->id) {
         throw new moodle_exception('invalidpreview', 'local_courseblueprints');
     }
-    $runid = $service->enqueue($draft['versionid'], $draft['targets'],
-        $draft['requestkey'], $USER->id);
+    $runid = $service->enqueue(
+        $draft['versionid'],
+        $draft['targets'],
+        $draft['requestkey'],
+        $USER->id
+    );
     unset($SESSION->local_cb_wizard);
-    redirect(new moodle_url('/local/courseblueprints/history.php', ['id' => $runid]),
-        get_string('queued', 'local_courseblueprints'));
+    redirect(
+        new moodle_url('/local/courseblueprints/history.php', ['id' => $runid]),
+        get_string('queued', 'local_courseblueprints')
+    );
 }
 
 if ($step === 3) {
@@ -56,10 +62,11 @@ if ($step === 3) {
     }
     $version = $repo->version($draft['versionid']);
     $issues = (new \local_courseblueprints\local\dependency_checker())->check(
-        json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR));
+        json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR)
+    );
     echo $OUTPUT->header();
     echo $OUTPUT->render_from_template('local_courseblueprints/preview', [
-        'rows' => array_map(static function(array $target): array {
+        'rows' => array_map(static function (array $target): array {
             return ['fullname' => s($target['fullname']), 'shortname' => s($target['shortname']),
                 'categoryid' => $target['categoryid'],
                 'startdate' => userdate($target['startdate']),
@@ -148,8 +155,10 @@ foreach ($repo->catalogue() as $blueprint) {
     }
 }
 if (!$options) {
-    redirect(new moodle_url('/local/courseblueprints/index.php'),
-        get_string('nopublished', 'local_courseblueprints'));
+    redirect(
+        new moodle_url('/local/courseblueprints/index.php'),
+        get_string('nopublished', 'local_courseblueprints')
+    );
 }
 $form = new \local_courseblueprints\form\provision_select_form(null, ['versions' => $options]);
 if ($form->is_cancelled()) {
@@ -160,8 +169,10 @@ if ($data = $form->get_data()) {
     if (!isset($options[$data->versionid])) {
         throw new moodle_exception('invalidversion', 'local_courseblueprints');
     }
-    redirect(new moodle_url('/local/courseblueprints/provision.php',
-        ['step' => 2, 'versionid' => $data->versionid]));
+    redirect(new moodle_url(
+        '/local/courseblueprints/provision.php',
+        ['step' => 2, 'versionid' => $data->versionid]
+    ));
 }
 echo $OUTPUT->header();
 $form->display();

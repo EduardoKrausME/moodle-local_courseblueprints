@@ -35,33 +35,51 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provision_settings_form extends \moodleform {
-    /** Form API definition. */
+    /**
+     * Form API definition.
+     */
     protected function definition(): void {
         $mform = $this->_form;
         $mform->addElement('hidden', 'versionid', $this->_customdata['versionid']);
         $mform->setType('versionid', PARAM_INT);
-        $mform->addElement('select', 'categoryid', get_string('category', 'local_courseblueprints'),
-            \core_course_category::make_categories_list('moodle/course:create'));
+        $mform->addElement(
+            'select',
+            'categoryid',
+            get_string('category', 'local_courseblueprints'),
+            \core_course_category::make_categories_list('moodle/course:create')
+        );
         $mform->addRule('categoryid', null, 'required');
         $mform->addElement('text', 'fullname', get_string('fullname', 'local_courseblueprints'), ['size' => 60]);
         $mform->setType('fullname', PARAM_TEXT);
         $mform->addElement('text', 'shortname', get_string('shortname', 'local_courseblueprints'));
         $mform->setType('shortname', PARAM_TEXT);
         $mform->addElement('date_time_selector', 'startdate', get_string('startdate', 'local_courseblueprints'));
-        $mform->addElement('date_time_selector', 'enddate', get_string('enddate', 'local_courseblueprints'),
-            ['optional' => true]);
-        $mform->addElement('textarea', 'batch', get_string('batch', 'local_courseblueprints'),
-            ['rows' => 5, 'cols' => 75]);
+        $mform->addElement(
+            'date_time_selector',
+            'enddate',
+            get_string('enddate', 'local_courseblueprints'),
+            ['optional' => true]
+        );
+        $mform->addElement(
+            'textarea',
+            'batch',
+            get_string('batch', 'local_courseblueprints'),
+            ['rows' => 5, 'cols' => 75]
+        );
         $mform->setType('batch', PARAM_RAW_TRIMMED);
         $mform->addElement('static', 'batchhelp', '', get_string('batchhelp', 'local_courseblueprints'));
         $this->add_action_buttons(true, get_string('preview', 'local_courseblueprints'));
     }
 
-    /** Validate both single and batch configurations. */
+    /**
+     * Validate both single and batch configurations.
+     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
-        if (trim($data['batch'] ?? '') === '' && (trim($data['fullname'] ?? '') === '' ||
-                trim($data['shortname'] ?? '') === '')) {
+        if (
+            trim($data['batch'] ?? '') === '' && (trim($data['fullname'] ?? '') === '' ||
+                trim($data['shortname'] ?? '') === '')
+        ) {
             $errors['fullname'] = get_string('namesrequired', 'local_courseblueprints');
         }
         if (!empty($data['enddate']) && $data['enddate'] < $data['startdate']) {

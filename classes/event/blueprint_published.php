@@ -24,30 +24,47 @@
 
 namespace local_courseblueprints\event;
 
-defined('MOODLE_INTERNAL') || die();
 
-/** Publication of one reviewed revision. */
+/**
+ * Publication of one reviewed revision.
+ */
 class blueprint_published extends \core\event\base {
-    /** Event metadata. */
+    /**
+     * Event metadata.
+     */
     protected function init(): void {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_OTHER;
         $this->data['objecttable'] = 'local_courseblueprints_ver';
     }
 
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public static function get_name(): string {
         return get_string('eventpublished', 'local_courseblueprints');
     }
 
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public function get_description(): string {
         return 'User ' . $this->userid . ' published blueprint revision ' . $this->objectid . '.';
     }
 
-    /** @return \moodle_url */
+    /**
+     * Return the requested value.
+     *
+     * @return \moodle_url
+     */
     public function get_url(): \moodle_url {
-        return new \moodle_url('/local/courseblueprints/versions.php',
-            ['id' => $this->other['blueprintid']]);
+        return new \moodle_url(
+            '/local/courseblueprints/versions.php',
+            ['id' => $this->other['blueprintid']]
+        );
     }
 }

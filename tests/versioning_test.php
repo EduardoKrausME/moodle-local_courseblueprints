@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Version and content immutability tests.
@@ -32,9 +31,12 @@ defined('MOODLE_INTERNAL') || die();
  * @package local_courseblueprints
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_courseblueprints\local\blueprint_version_manager
  */
-class versioning_test extends \advanced_testcase {
-    /** Published versions cannot be mutated. */
+final class versioning_test extends \advanced_testcase {
+    /**
+     * Published versions cannot be mutated.
+     */
     public function test_revision_numbers_are_monotonic_and_published_is_immutable(): void {
         global $DB;
         $this->resetAfterTest();
@@ -55,7 +57,9 @@ class versioning_test extends \advanced_testcase {
         $manager->set_review($v1, true, 'Second alteration must not be possible');
     }
 
-    /** Archived versions remain readable by IDs already pinned to courses. */
+    /**
+     * Archived versions remain readable by IDs already pinned to courses.
+     */
     public function test_archiving_does_not_delete_revision(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
@@ -71,10 +75,14 @@ class versioning_test extends \advanced_testcase {
         $this->assertEquals('archived', $repo->version($v)->status);
     }
 
-    /** Fingerprints should not depend on associative insertion order. */
+    /**
+     * Fingerprints should not depend on associative insertion order.
+     */
     public function test_hash_is_order_invariant_for_associative_objects(): void {
         $manager = new \local_courseblueprints\local\blueprint_version_manager();
-        $this->assertSame($manager::canonical_json(['a' => 1, 'b' => ['z' => 2, 'c' => 3]]),
-            $manager::canonical_json(['b' => ['c' => 3, 'z' => 2], 'a' => 1]));
+        $this->assertSame(
+            $manager::canonical_json(['a' => 1, 'b' => ['z' => 2, 'c' => 3]]),
+            $manager::canonical_json(['b' => ['c' => 3, 'z' => 2], 'a' => 1])
+        );
     }
 }

@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Collect portable, predictable structure without user information.
@@ -34,12 +33,18 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_structure_collector {
-    /** Capture course sections and module identities without activities' user records. */
+    /**
+     * Capture course sections and module identities without activities' user records.
+     */
     public function collect(int $courseid): array {
         global $DB;
         $course = get_course($courseid);
-        $sections = $DB->get_records('course_sections', ['course' => $courseid], 'section ASC',
-            'id,section,name,summary,summaryformat,availability');
+        $sections = $DB->get_records(
+            'course_sections',
+            ['course' => $courseid],
+            'section ASC',
+            'id,section,name,summary,summaryformat,availability'
+        );
         $modinfo = get_fast_modinfo($course);
         $data = [
             'format' => $course->format, 'visible' => (int) $course->visible,
@@ -67,13 +72,15 @@ class course_structure_collector {
                 'availability' => (string) ($cm->availability ?? ''),
             ];
         }
-        usort($data['activities'], static function(array $a, array $b): int {
+        usort($data['activities'], static function (array $a, array $b): int {
             return strcmp(json_encode($a), json_encode($b));
         });
         return $data;
     }
 
-    /** Capture initial configuration, never pretending that unsupported activities can be constructed. */
+    /**
+     * Capture initial configuration, never pretending that unsupported activities can be constructed.
+     */
     public function from_initial(array $settings): array {
         $count = max(1, min(52, (int) ($settings['sections'] ?? 5)));
         $sections = [];

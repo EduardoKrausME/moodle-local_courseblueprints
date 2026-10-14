@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * End-to-end Moodle backup and private artifact checksum integration test.
@@ -32,9 +31,13 @@ defined('MOODLE_INTERNAL') || die();
  * @package local_courseblueprints
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_courseblueprints\local\backup_adapter
+ * @covers \local_courseblueprints\local\restore_adapter
  */
-class backup_restore_integration_test extends \advanced_testcase {
-    /** A real course backup must produce a private, verifiable .mbz. */
+final class backup_restore_integration_test extends \advanced_testcase {
+    /**
+     * A real course backup must produce a private, verifiable .mbz.
+     */
     public function test_real_course_backup_has_verifiable_artifact(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -46,7 +49,12 @@ class backup_restore_integration_test extends \advanced_testcase {
         $structure = (new \local_courseblueprints\local\course_structure_collector())->collect($course->id);
         $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
         $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
-            $id, get_admin()->id, $structure, $manifest, $course->id);
+            $id,
+            get_admin()->id,
+            $structure,
+            $manifest,
+            $course->id
+        );
         $adapter = new \local_courseblueprints\local\backup_adapter();
         $adapter->capture($versionid, get_admin()->id);
         $version = $repo->version($versionid);
@@ -55,7 +63,10 @@ class backup_restore_integration_test extends \advanced_testcase {
         // Restore uses Moodle's real restore_controller into a newly created course.
         $destination = $this->getDataGenerator()->create_course(['format' => $course->format]);
         (new \local_courseblueprints\local\restore_adapter())->restore(
-            $version, $destination->id, get_admin()->id);
+            $version,
+            $destination->id,
+            get_admin()->id
+        );
         $after = (new \local_courseblueprints\local\course_structure_collector())->collect($destination->id);
         $this->assertContains('forum', array_column($after['activities'], 'modname'));
     }

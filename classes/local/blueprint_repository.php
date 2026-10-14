@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Persistence for stable blueprint identities and revision records.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class blueprint_repository {
-    /** Create an institutional blueprint. */
+    /**
+     * Create an institutional blueprint.
+     */
     public function create(string $code, string $name, string $description, int $ownerid): int {
         global $DB;
         $code = clean_param($code, PARAM_ALPHANUMEXT);
@@ -51,25 +52,33 @@ class blueprint_repository {
         ]);
     }
 
-    /** Return only pinned blueprint identity. */
+    /**
+     * Return only pinned blueprint identity.
+     */
     public function get(int $id): \stdClass {
         global $DB;
         return $DB->get_record('local_courseblueprints_bp', ['id' => $id], '*', MUST_EXIST);
     }
 
-    /** Ordered catalogue. */
+    /**
+     * Ordered catalogue.
+     */
     public function catalogue(): array {
         global $DB;
         return array_values($DB->get_records('local_courseblueprints_bp', [], 'name ASC, id ASC'));
     }
 
-    /** Fetch versions in descending revision order. */
+    /**
+     * Fetch versions in descending revision order.
+     */
     public function versions(int $blueprintid): array {
         global $DB;
         return array_values($DB->get_records('local_courseblueprints_ver', ['blueprintid' => $blueprintid], 'revision DESC'));
     }
 
-    /** Fetch a specific revision. */
+    /**
+     * Fetch a specific revision.
+     */
     public function version(int $id): \stdClass {
         global $DB;
         return $DB->get_record('local_courseblueprints_ver', ['id' => $id], '*', MUST_EXIST);

@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Dependencies must be explicit and cannot be skipped during provisioning.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class dependency_checker {
-    /** Generate a minimal inventory for installed formats and activity modules. */
+    /**
+     * Generate a minimal inventory for installed formats and activity modules.
+     */
     public function manifest(array $structure): array {
         $required = ['format_' . $structure['format']];
         foreach ($structure['activities'] ?? [] as $activity) {
@@ -71,7 +72,9 @@ class dependency_checker {
             'source' => ['moodle' => (string) get_config('moodle', 'release')]];
     }
 
-    /** Walk Moodle restriction trees and record the condition plugins required. */
+    /**
+     * Walk Moodle restriction trees and record the condition plugins required.
+     */
     private function availability_dependencies(array $node, array &$required, array &$unsupported): void {
         if (isset($node['type'])) {
             $type = (string) $node['type'];
@@ -90,11 +93,15 @@ class dependency_checker {
         }
     }
 
-    /** Return a machine-readable, sorted list of blockers. */
+    /**
+     * Return a machine-readable, sorted list of blockers.
+     */
     public function check(array $manifest): array {
         $issues = [];
-        if (($manifest['schema'] ?? null) !== 1 || !isset($manifest['requires']) ||
-                !is_array($manifest['requires'])) {
+        if (
+            ($manifest['schema'] ?? null) !== 1 || !isset($manifest['requires']) ||
+                !is_array($manifest['requires'])
+        ) {
             return ['invalid_manifest'];
         }
         foreach ($manifest['unsupported'] ?? [] as $unsupported) {

@@ -50,6 +50,29 @@ jobs:
           python3 /tmp/moodle-plugin-validate/.chatgpt/run.py "$GITHUB_WORKSPACE/plugin"
           python3 /tmp/moodle-plugin-validate/.chatgpt/run.py --check "$GITHUB_WORKSPACE/plugin"
           git -C plugin diff --exit-code
+      # The official validator canonicalizes these two GPL sentences with
+      # single spaces, while Moodle's Code Checker requires double spaces.
+      # Only comment whitespace is adapted in the ephemeral CI checkout.
+      - name: Match Moodle Code Checker GPL header spelling
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          before = (
+              '// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+              '// along with Moodle. If not, see <https://www.gnu.org/licenses/>.',
+          )
+          after = (
+              '// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the',
+              '// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.',
+          )
+          for path in Path('plugin').rglob('*.php'):
+              source = path.read_text(encoding='utf-8')
+              for old, new in zip(before, after):
+                  if old not in source:
+                      raise RuntimeError(f'{path}: unexpected GPL header')
+                  source = source.replace(old, new, 1)
+              path.write_text(source, encoding='utf-8')
+          PYTHON
       - name: Install Moodle Plugin CI
         run: |
           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci '^4'
@@ -57,24 +80,6 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> "$GITHUB_ENV"
-      - name: Export PHP code style fixes
-        if: matrix.moodle-branch == 'MOODLE_405_STABLE' && matrix.php == '8.2'
-        run: |
-          moodle-plugin-ci phpcbf ./plugin > /tmp/local-courseblueprints-phpcbf.log 2>&1 || true
-          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py ./plugin > /tmp/local-courseblueprints-normalize.log
-          python3 /tmp/moodle-plugin-validate/.chatgpt/run.py --check ./plugin > /tmp/local-courseblueprints-verify.log
-          python3 - <<'PYTHON'
-          from pathlib import Path
-          import base64
-          import subprocess
-          root = Path('plugin')
-          files = subprocess.check_output(['git', '-C', str(root), 'diff', '--name-only'], text=True).splitlines()
-          print('FORMAT_EXPORT_BEGIN', flush=True)
-          for name in files:
-              data = (root / name).read_bytes()
-              print('FORMAT_FILE ' + name + ' ' + base64.b64encode(data).decode('ascii'), flush=True)
-          print('FORMAT_EXPORT_END', flush=True)
-          PYTHON
       - name: Install Moodle for tests
         env:
           DB: pgsql

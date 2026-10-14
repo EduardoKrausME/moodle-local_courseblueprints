@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Informational course-versus-pinned-version structural analysis.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_comparison_service {
-    /** Compare portable arrays, including repeated activities as a multiset. */
+    /**
+     * Compare portable arrays, including repeated activities as a multiset.
+     */
     public function diff(array $baseline, array $actual): array {
         $differences = [];
         $left = [];
@@ -78,18 +79,22 @@ class course_comparison_service {
         $oldsettings = $this->setting_inventory($baseline['activities'] ?? []);
         $newsettings = $this->setting_inventory($actual['activities'] ?? []);
         foreach (array_intersect(array_keys($oldsettings), array_keys($newsettings)) as $identity) {
-            if (($before[$identity] ?? 0) === ($after[$identity] ?? 0) &&
-                    $oldsettings[$identity] !== $newsettings[$identity]) {
+            if (
+                ($before[$identity] ?? 0) === ($after[$identity] ?? 0) &&
+                    $oldsettings[$identity] !== $newsettings[$identity]
+            ) {
                 $differences[] = ['type' => 'activity_setting_changed', 'detail' => $identity];
             }
         }
-        usort($differences, static function($a, $b): int {
+        usort($differences, static function ($a, $b): int {
             return strcmp($a['type'] . $a['detail'], $b['type'] . $b['detail']);
         });
         return $differences;
     }
 
-    /** Collect normalized occurrences without unstable module IDs. */
+    /**
+     * Collect normalized occurrences without unstable module IDs.
+     */
     private function inventory(array $activities): array {
         $result = [];
         foreach ($activities as $activity) {
@@ -99,7 +104,9 @@ class course_comparison_service {
         return $result;
     }
 
-    /** Compare completion and availability settings by repeated activity identity. */
+    /**
+     * Compare completion and availability settings by repeated activity identity.
+     */
     private function setting_inventory(array $activities): array {
         $result = [];
         foreach ($activities as $activity) {
@@ -114,7 +121,9 @@ class course_comparison_service {
         return $result;
     }
 
-    /** Analyze a course against its immutable post-provisioning baseline. */
+    /**
+     * Analyze a course against its immutable post-provisioning baseline.
+     */
     public function compare_course(int $courseid): array {
         global $DB;
         $map = $DB->get_record('local_courseblueprints_map', ['courseid' => $courseid], '*', MUST_EXIST);

@@ -35,7 +35,9 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class import_form extends \moodleform {
-    /** Form API definition. */
+    /**
+     * Form API definition.
+     */
     protected function definition(): void {
         $mform = $this->_form;
         $mform->addElement('text', 'code', get_string('code', 'local_courseblueprints'));
@@ -44,11 +46,21 @@ class import_form extends \moodleform {
         $mform->addElement('text', 'name', get_string('name', 'local_courseblueprints'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required');
-        $mform->addElement('filepicker', 'manifestfile', get_string('manifestfile', 'local_courseblueprints'),
-            null, ['accepted_types' => ['.json'], 'maxbytes' => 1048576]);
+        $mform->addElement(
+            'filepicker',
+            'manifestfile',
+            get_string('manifestfile', 'local_courseblueprints'),
+            null,
+            ['accepted_types' => ['.json'], 'maxbytes' => 1048576]
+        );
         $mform->addRule('manifestfile', null, 'required');
-        $mform->addElement('filepicker', 'backupfile', get_string('backupfile', 'local_courseblueprints'),
-            null, ['accepted_types' => ['.mbz']]);
+        $mform->addElement(
+            'filepicker',
+            'backupfile',
+            get_string('backupfile', 'local_courseblueprints'),
+            null,
+            ['accepted_types' => ['.mbz']]
+        );
         $this->add_action_buttons(true, get_string('import', 'local_courseblueprints'));
     }
 }

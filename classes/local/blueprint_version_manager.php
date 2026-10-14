@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Version creation, publication and archive transitions.
@@ -34,13 +33,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class blueprint_version_manager {
-    /** Deterministic canonical JSON for content hashes. */
+    /**
+     * Deterministic canonical JSON for content hashes.
+     */
     public static function canonical_json(array $value): string {
         self::sort_recursive($value);
         return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
-    /** Recursively sort associative objects, retaining list ordering. */
+    /**
+     * Recursively sort associative objects, retaining list ordering.
+     */
     private static function sort_recursive(array &$value): void {
         if (!array_is_list($value)) {
             ksort($value, SORT_STRING);
@@ -52,9 +55,16 @@ class blueprint_version_manager {
         }
     }
 
-    /** Create a new, never-in-place revision while holding a Moodle lock. */
-    public function create_revision(int $blueprintid, int $authorid, array $structure, array $manifest,
-            ?int $sourcecourseid = null): int {
+    /**
+     * Create a new, never-in-place revision while holding a Moodle lock.
+     */
+    public function create_revision(
+        int $blueprintid,
+        int $authorid,
+        array $structure,
+        array $manifest,
+        ?int $sourcecourseid = null
+    ): int {
         global $DB;
         $repo = new blueprint_repository();
         $repo->get($blueprintid);
@@ -65,7 +75,9 @@ class blueprint_version_manager {
         }
         try {
             $revision = (int) $DB->get_field_sql(
-                'SELECT MAX(revision) FROM {local_courseblueprints_ver} WHERE blueprintid = ?', [$blueprintid]);
+                'SELECT MAX(revision) FROM {local_courseblueprints_ver} WHERE blueprintid = ?',
+                [$blueprintid]
+            );
             $payload = ['structure' => $structure, 'manifest' => $manifest];
             return $DB->insert_record('local_courseblueprints_ver', (object) [
                 'blueprintid' => $blueprintid, 'revision' => $revision + 1,
@@ -82,7 +94,9 @@ class blueprint_version_manager {
         }
     }
 
-    /** Mutate draft only. Includes independent review and evidence from content scanning. */
+    /**
+     * Mutate draft only. Includes independent review and evidence from content scanning.
+     */
     public function set_review(int $versionid, bool $approved, string $notes): void {
         global $DB, $USER;
         $version = (new blueprint_repository())->version($versionid);
@@ -98,7 +112,9 @@ class blueprint_version_manager {
         ]);
     }
 
-    /** Publish only a reviewed revision with satisfied dependencies and intact artifacts. */
+    /**
+     * Publish only a reviewed revision with satisfied dependencies and intact artifacts.
+     */
     public function publish(int $versionid): void {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);
@@ -135,7 +151,9 @@ class blueprint_version_manager {
         ])->trigger();
     }
 
-    /** Archival affects catalogue availability, never provisioning history. */
+    /**
+     * Archival affects catalogue availability, never provisioning history.
+     */
     public function archive(int $versionid): void {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);

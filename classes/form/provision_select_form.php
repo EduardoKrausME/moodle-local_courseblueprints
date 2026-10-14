@@ -35,7 +35,9 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provision_select_form extends \moodleform {
-    /** Form API definition. */
+    /**
+     * Form API definition.
+     */
     protected function definition(): void {
         $options = $this->_customdata['versions'];
         $mform = $this->_form;

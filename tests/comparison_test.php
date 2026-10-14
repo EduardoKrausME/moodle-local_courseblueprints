@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Informative, deterministic structural divergence checks.
@@ -32,9 +31,12 @@ defined('MOODLE_INTERNAL') || die();
  * @package local_courseblueprints
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \local_courseblueprints\local\course_comparison_service
  */
-class comparison_test extends \advanced_testcase {
-    /** Detect changes without attempting course modifications. */
+final class comparison_test extends \advanced_testcase {
+    /**
+     * Detect changes without attempting course modifications.
+     */
     public function test_structural_differences_reported(): void {
         $base = ['format' => 'topics', 'sections' => [
             ['number' => 0, 'name' => 'General'], ['number' => 1, 'name' => 'Unit A'],

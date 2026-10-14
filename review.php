@@ -45,18 +45,22 @@ if ($data = $form->get_data()) {
     if ((int) $data->versionid !== $id) {
         throw new moodle_exception('invalidversion', 'local_courseblueprints');
     }
-    (new \local_courseblueprints\local\blueprint_version_manager())->set_review($id,
-        (bool) $data->reviewed, $data->reviewnotes);
+    (new \local_courseblueprints\local\blueprint_version_manager())->set_review(
+        $id,
+        (bool) $data->reviewed,
+        $data->reviewnotes
+    );
     redirect(new moodle_url('/local/courseblueprints/versions.php', ['id' => $version->blueprintid]));
 }
 $structure = json_decode($version->structure, true, 512, JSON_THROW_ON_ERROR);
 $warnings = (new \local_courseblueprints\local\privacy_guard())->inspect($structure);
 $warnings = array_merge($warnings, (new \local_courseblueprints\local\dependency_checker())->check(
-    json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR)));
+    json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR)
+));
 echo $OUTPUT->header();
 echo $OUTPUT->notification(get_string('reviewwarning', 'local_courseblueprints'), 'warning');
 echo $OUTPUT->render_from_template('local_courseblueprints/warnings', [
-    'warnings' => array_map(static function(string $warning): array {
+    'warnings' => array_map(static function (string $warning): array {
         return ['text' => s($warning)];
     }, $warnings),
 ]);

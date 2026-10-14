@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Conservative JSON schema and exported payload verifier.
@@ -34,20 +33,26 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class import_export_validator {
-    /** Validate structural envelope and portable metadata before trusting an import. */
+    /**
+     * Validate structural envelope and portable metadata before trusting an import.
+     */
     public function validate(array $document): array {
         $errors = [];
-        if (!empty($document['backuphash']) &&
+        if (
+            !empty($document['backuphash']) &&
                 (!is_string($document['backuphash']) ||
-                !preg_match('/^[a-f0-9]{64}$/D', $document['backuphash']))) {
+                !preg_match('/^[a-f0-9]{64}$/D', $document['backuphash']))
+        ) {
             $errors[] = 'invalid_backup_hash';
         }
         if (($document['schema'] ?? null) !== 1) {
             $errors[] = 'unsupported_schema';
         }
-        if (!is_array($document['structure'] ?? null) ||
+        if (
+            !is_array($document['structure'] ?? null) ||
                 !is_array($document['manifest'] ?? null) ||
-                !is_string($document['hash'] ?? null)) {
+                !is_string($document['hash'] ?? null)
+        ) {
             $errors[] = 'malformed_document';
         } else {
             $expected = hash('sha256', blueprint_version_manager::canonical_json([
@@ -64,7 +69,9 @@ class import_export_validator {
         return $errors;
     }
 
-    /** Export manifest-only JSON, never personal data or user records. */
+    /**
+     * Export manifest-only JSON, never personal data or user records.
+     */
     public function export(\stdClass $version): string {
         return blueprint_version_manager::canonical_json([
             'schema' => 1, 'revision' => (int) $version->revision,

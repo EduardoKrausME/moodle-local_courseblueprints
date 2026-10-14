@@ -34,8 +34,15 @@
  * @param array $options Download options.
  * @return bool
  */
-function local_courseblueprints_pluginfile($course, $cm, $context, $filearea, $args,
-        $forcedownload, array $options = []): bool {
+function local_courseblueprints_pluginfile(
+    $course,
+    $cm,
+    $context,
+    $filearea,
+    $args,
+    $forcedownload,
+    array $options = []
+): bool {
     require_login();
     require_capability('local/courseblueprints:view', context_system::instance());
     return false;

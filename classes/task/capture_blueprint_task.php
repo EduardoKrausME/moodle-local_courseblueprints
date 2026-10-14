@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\task;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Async backup capture worker.
@@ -34,12 +33,18 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class capture_blueprint_task extends \core\task\adhoc_task {
-    /** @return string */
+    /**
+     * Return the requested value.
+     *
+     * @return string
+     */
     public function get_name(): string {
         return get_string('taskcapture', 'local_courseblueprints');
     }
 
-    /** Capture a template archive using native backup jobs. */
+    /**
+     * Capture a template archive using native backup jobs.
+     */
     public function execute(): void {
         $data = $this->get_custom_data();
         (new \local_courseblueprints\local\backup_adapter())->capture((int) $data->versionid, (int) $data->userid);

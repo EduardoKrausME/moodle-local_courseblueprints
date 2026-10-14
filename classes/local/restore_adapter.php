@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Native Moodle restore with controlled temporary-file cleanup.
@@ -34,7 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_adapter {
-    /** Restore the version archive into a newly created empty course. */
+    /**
+     * Restore the version archive into a newly created empty course.
+     */
     public function restore(\stdClass $version, int $courseid, int $userid): void {
         global $CFG;
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
@@ -51,11 +52,19 @@ class restore_adapter {
                 throw new \moodle_exception('restorefailed', 'local_courseblueprints');
             }
             unlink($path);
-            $controller = new \restore_controller($restoreid, $courseid, \backup::INTERACTIVE_NO,
-                \backup::MODE_GENERAL, $userid, \backup::TARGET_CURRENT_ADDING);
+            $controller = new \restore_controller(
+                $restoreid,
+                $courseid,
+                \backup::INTERACTIVE_NO,
+                \backup::MODE_GENERAL,
+                $userid,
+                \backup::TARGET_CURRENT_ADDING
+            );
             $plan = $controller->get_plan();
-            foreach (['users', 'role_assignments', 'user_files', 'logs', 'grade_histories',
-                    'enrolments'] as $name) {
+            foreach (
+                ['users', 'role_assignments', 'user_files', 'logs', 'grade_histories',
+                    'enrolments'] as $name
+            ) {
                 try {
                     $setting = $plan->get_setting($name);
                     $setting->set_value(0);

@@ -22,9 +22,13 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 if ($hassiteconfig) {
-    $ADMIN->add('courses', new admin_externalpage('local_courseblueprints',
+    $ADMIN->add('courses', new admin_externalpage(
+        'local_courseblueprints',
         get_string('pluginname', 'local_courseblueprints'),
         new moodle_url('/local/courseblueprints/index.php'),
-        'local/courseblueprints:view'));
+        'local/courseblueprints:view'
+    ));
 }

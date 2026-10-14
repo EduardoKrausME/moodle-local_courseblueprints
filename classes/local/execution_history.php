@@ -24,7 +24,6 @@
 
 namespace local_courseblueprints\local;
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Append-oriented provisioning history facade.
@@ -34,13 +33,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class execution_history {
-    /** Fetch run items with independent outcomes. */
+    /**
+     * Fetch run items with independent outcomes.
+     */
     public function items(int $runid): array {
         global $DB;
         return array_values($DB->get_records('local_courseblueprints_itm', ['runid' => $runid], 'rownum ASC'));
     }
 
-    /** Recent runs for audit. */
+    /**
+     * Recent runs for audit.
+     */
     public function recent(int $limit = 30): array {
         global $DB;
         return array_values($DB->get_records('local_courseblueprints_run', [], 'timecreated DESC', '*', 0, $limit));
