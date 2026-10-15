@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026101500;
-$plugin->release = '1.0.2';
+$plugin->version = 2026101501;
+$plugin->release = '1.0.3';
 $plugin->requires = 2024100700;
 $plugin->component = 'local_courseblueprints';
 $plugin->maturity = MATURITY_STABLE;
