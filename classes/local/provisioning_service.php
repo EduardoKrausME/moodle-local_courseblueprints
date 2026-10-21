@@ -46,7 +46,7 @@ class provisioning_service {
         ];
         if (
             !$data['categoryid'] || !$data['fullname'] || !$data['shortname'] ||
-                \core_text::strlen($data['fullname']) > 254 || \core_text::strlen($data['shortname']) > 254 ||
+                strlen($data['fullname']) > 254 || strlen($data['shortname']) > 254 ||
                 ($data['enddate'] && $data['startdate'] > $data['enddate'])
         ) {
             throw new \invalid_parameter_exception('Invalid provisioning parameters');
