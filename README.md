@@ -72,4 +72,4 @@ For a production recovery, an administrator must inspect the partial course, rev
 
 The tests cover revision immutability, SHA integrity, dependency and privacy flags, batch idempotency, parameter validation and deterministic structural diffs. Integration tests need a real installed Moodle with backup/restore configured; GitHub Actions has been added but no CI outcome can be inferred until the workflows run.
 
-See `docs/architecture.md`, `docs/installation.md`, `docs/usage.md` and `docs/security.md` for details.
+See `docs/architecture.md`, `docs/usage.md` and `docs/security.md` for details.
