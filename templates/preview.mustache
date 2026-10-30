@@ -27,6 +27,8 @@
         "fullname": "Full name",
         "shortname": "Short name",
         "category": "Category",
+        "startdatelabel": "Start date",
+        "enddatelabel": "End date",
         "rows": [
             {
                 "fullname": "Example course",
@@ -46,7 +48,7 @@
     <h2>{{title}}</h2>
     {{#hasissues}}<p class="alert alert-danger">{{issues}}</p>{{/hasissues}}
     <div class="table-responsive"><table class="table">
-        <thead><tr><th>{{fullname}}</th><th>{{shortname}}</th><th>{{category}}</th><th>Start</th><th>End</th></tr></thead>
+        <thead><tr><th>{{fullname}}</th><th>{{shortname}}</th><th>{{category}}</th><th>{{startdatelabel}}</th><th>{{enddatelabel}}</th></tr></thead>
         <tbody>{{#rows}}<tr><td>{{fullname}}</td><td>{{shortname}}</td><td>{{categoryid}}</td><td>{{startdate}}</td><td>{{enddate}}</td></tr>{{/rows}}</tbody>
     </table></div>
     {{^hasissues}}<form method="post" action="{{{actionurl}}}">
