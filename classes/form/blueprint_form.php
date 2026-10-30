@@ -56,7 +56,9 @@ class blueprint_form extends \moodleform {
         $mform->setType('sourcecourseid', PARAM_INT);
         $mform->hideIf('sourcecourseid', 'mode', 'eq', 'blank');
         $mform->addElement('select', 'format', get_string('courseformat', 'local_courseblueprints'), [
-            'topics' => 'Topics', 'weeks' => 'Weeks', 'singleactivity' => 'Single activity',
+            'topics' => get_string('pluginname', 'format_topics'),
+            'weeks' => get_string('pluginname', 'format_weeks'),
+            'singleactivity' => get_string('pluginname', 'format_singleactivity'),
         ]);
         $mform->hideIf('format', 'mode', 'eq', 'existing');
         $mform->addElement('text', 'sections', get_string('sections', 'local_courseblueprints'));
