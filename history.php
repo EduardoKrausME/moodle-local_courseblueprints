@@ -33,13 +33,21 @@ $PAGE->set_url(new moodle_url('/local/courseblueprints/history.php', $id ? ['id'
 $PAGE->set_title(get_string('history', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('history', 'local_courseblueprints'));
 $history = new \local_courseblueprints\local\execution_history();
+$itemstatuses = [
+    'queued' => get_string('runstatusqueued', 'local_courseblueprints'),
+    'processing' => get_string('runstatusprocessing', 'local_courseblueprints'),
+    'complete' => get_string('runstatuscomplete', 'local_courseblueprints'),
+    'needs_review' => get_string('runstatusneedsreview', 'local_courseblueprints'),
+    'failed_review' => get_string('runstatusfailedreview', 'local_courseblueprints'),
+];
 $rows = [];
 if ($id) {
     $DB->get_record('local_courseblueprints_run', ['id' => $id], '*', MUST_EXIST);
     foreach ($history->items($id) as $item) {
         $rows[] = [
             'id' => $item->id, 'fullname' => s($item->fullname),
-            'status' => s($item->status), 'error' => s($item->errormessage ?? ''),
+            'status' => $itemstatuses[$item->status] ?? s($item->status),
+            'error' => s($item->errormessage ?? ''),
             'hascourse' => !empty($item->courseid), 'courseid' => $item->courseid,
             'courseurl' => $item->courseid ?
                 (new moodle_url('/course/view.php', ['id' => $item->courseid]))->out(false) : '',
@@ -50,8 +58,8 @@ if ($id) {
 } else {
     foreach ($history->recent() as $run) {
         $rows[] = [
-            'id' => $run->id, 'fullname' => 'Batch #' . $run->id,
-            'status' => 'V' . $run->versionid, 'error' => '',
+            'id' => $run->id, 'fullname' => get_string('batchnumber', 'local_courseblueprints', $run->id),
+            'status' => get_string('versionid', 'local_courseblueprints', $run->versionid), 'error' => '',
             'hascourse' => false, 'courseid' => 0, 'compareurl' => '',
             'courseurl' => (new moodle_url('/local/courseblueprints/history.php', ['id' => $run->id]))->out(false),
             'isrun' => true,
