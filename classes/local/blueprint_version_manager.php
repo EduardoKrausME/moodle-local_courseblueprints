@@ -104,7 +104,7 @@ class blueprint_version_manager {
             throw new \moodle_exception('immutableversion', 'local_courseblueprints');
         }
         if (trim($notes) === '') {
-            throw new \invalid_parameter_exception('A human review record is required');
+            throw new \invalid_parameter_exception(get_string('invalidreviewrecord', 'local_courseblueprints'));
         }
         $DB->update_record('local_courseblueprints_ver', (object) [
             'id' => $versionid, 'reviewed' => (int) $approved, 'reviewnotes' => trim($notes),
