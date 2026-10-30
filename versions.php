@@ -78,12 +78,17 @@ if ($action && $versionid) {
         redirect($PAGE->url, get_string('createddraft', 'local_courseblueprints'));
     }
 }
+$versionstatuses = [
+    'draft' => get_string('versionstatusdraft', 'local_courseblueprints'),
+    'published' => get_string('versionstatuspublished', 'local_courseblueprints'),
+    'archived' => get_string('versionstatusarchived', 'local_courseblueprints'),
+];
 $versionrows = [];
 foreach ($repo->versions($id) as $version) {
     $manifest = json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR);
     $issues = (new \local_courseblueprints\local\dependency_checker())->check($manifest);
     $versionrows[] = [
-        'revision' => $version->revision, 'status' => s($version->status),
+        'revision' => $version->revision, 'status' => $versionstatuses[$version->status] ?? s($version->status),
         'id' => $version->id, 'reviewed' => (bool) $version->reviewed,
         'hasissues' => !empty($issues), 'issues' => implode(', ', $issues),
         'hasbackup' => !empty($version->backuphash),
@@ -107,6 +112,7 @@ echo $OUTPUT->render_from_template('local_courseblueprints/versions', [
     'revision' => get_string('revision', 'local_courseblueprints'),
     'status' => get_string('status', 'local_courseblueprints'),
     'dependencies' => get_string('dependencies', 'local_courseblueprints'),
+    'dependenciesok' => get_string('dependenciesok', 'local_courseblueprints'),
     'returnurl' => (new moodle_url('/local/courseblueprints/index.php'))->out(false),
     'back' => get_string('back'),
 ]);
