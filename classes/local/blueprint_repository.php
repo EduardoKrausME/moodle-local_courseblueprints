@@ -40,7 +40,7 @@ class blueprint_repository {
         global $DB;
         $code = clean_param($code, PARAM_ALPHANUMEXT);
         if ($code === '' || trim($name) === '') {
-            throw new \invalid_parameter_exception('Blueprint code and name are required');
+            throw new \invalid_parameter_exception(get_string('invalidblueprintidentity', 'local_courseblueprints'));
         }
         if ($DB->record_exists('local_courseblueprints_bp', ['code' => $code])) {
             throw new \moodle_exception('duplicatecode', 'local_courseblueprints');

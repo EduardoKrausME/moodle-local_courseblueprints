@@ -80,6 +80,8 @@ if ($step === 3) {
         'category' => get_string('category', 'local_courseblueprints'),
         'fullname' => get_string('fullname', 'local_courseblueprints'),
         'shortname' => get_string('shortname', 'local_courseblueprints'),
+        'startdatelabel' => get_string('startdatelabel', 'local_courseblueprints'),
+        'enddatelabel' => get_string('enddatelabel', 'local_courseblueprints'),
     ]);
     echo $OUTPUT->footer();
     exit;
@@ -109,7 +111,7 @@ if ($step === 2) {
                 }
                 $columns = explode('|', $line);
                 if (count($columns) !== 2) {
-                    throw new invalid_parameter_exception('Every batch row must have FULLNAME|SHORTNAME');
+                    throw new invalid_parameter_exception(get_string('invalidbatchrow', 'local_courseblueprints'));
                 }
                 $targets[] = $service->normalize([
                     'categoryid' => $data->categoryid, 'fullname' => $columns[0],
@@ -125,11 +127,11 @@ if ($step === 2) {
             ]);
         }
         if (!$targets || count($targets) > 100) {
-            throw new invalid_parameter_exception('Batch must contain between 1 and 100 courses');
+            throw new invalid_parameter_exception(get_string('invalidbatchsize', 'local_courseblueprints'));
         }
         $shortnames = array_column($targets, 'shortname');
         if (count(array_unique($shortnames)) !== count($shortnames)) {
-            throw new invalid_parameter_exception('Duplicate short names in batch');
+            throw new invalid_parameter_exception(get_string('duplicatebatchshortnames', 'local_courseblueprints'));
         }
         foreach ($targets as $target) {
             require_capability('moodle/course:create', context_coursecat::instance($target['categoryid']));

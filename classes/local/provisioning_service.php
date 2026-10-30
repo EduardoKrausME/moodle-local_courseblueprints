@@ -49,7 +49,7 @@ class provisioning_service {
                 strlen($data['fullname']) > 254 || strlen($data['shortname']) > 254 ||
                 ($data['enddate'] && $data['startdate'] > $data['enddate'])
         ) {
-            throw new \invalid_parameter_exception('Invalid provisioning parameters');
+            throw new \invalid_parameter_exception(get_string('invalidprovisionparams', 'local_courseblueprints'));
         }
         return $data;
     }
@@ -64,7 +64,7 @@ class provisioning_service {
             throw new \moodle_exception('unpublishedversion', 'local_courseblueprints');
         }
         if (!preg_match('/^[a-f0-9]{64}$/D', $requestkey) || !$targets || count($targets) > 100) {
-            throw new \invalid_parameter_exception('Invalid request key or target count');
+            throw new \invalid_parameter_exception(get_string('invalidrequestkey', 'local_courseblueprints'));
         }
         if ((new dependency_checker())->check(json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR))) {
             throw new \moodle_exception('missingdependencies', 'local_courseblueprints');
@@ -160,7 +160,7 @@ class provisioning_service {
                     $item,
                     'failed_review',
                     'partial_course',
-                    'Existing provisioned course requires manual review; automatic restore disabled'
+                    get_string('partialcoursereview', 'local_courseblueprints')
                 );
                 return;
             }
@@ -171,7 +171,7 @@ class provisioning_service {
                     $item,
                     'failed_review',
                     'orphan_detected',
-                    'A course with this provisioning sentinel already exists; reconcile manually'
+                    get_string('orphancoursereview', 'local_courseblueprints')
                 );
                 return;
             }

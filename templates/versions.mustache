@@ -26,6 +26,7 @@
         "revision": "Revision",
         "status": "Status",
         "dependencies": "Dependencies",
+        "dependenciesok": "OK",
         "versions": [
             {
                 "id": 1,
@@ -57,7 +58,7 @@
         <thead><tr><th>{{revision}}</th><th>{{status}}</th><th>{{dependencies}}</th><th></th></tr></thead>
         <tbody>{{#versions}}<tr>
             <td>{{revision}}</td><td>{{status}}{{#reviewed}} ✓{{/reviewed}}</td>
-            <td>{{#hasissues}}<span class="text-danger">{{issues}}</span>{{/hasissues}}{{^hasissues}}OK{{/hasissues}}</td>
+            <td>{{#hasissues}}<span class="text-danger">{{issues}}</span>{{/hasissues}}{{^hasissues}}{{dependenciesok}}{{/hasissues}}</td>
             <td>
                 <a class="btn btn-link" href="{{{exporturl}}}">{{export}}</a>
                 {{#isdraft}}{{#canpublish}}<a class="btn btn-link" href="{{{reviewurl}}}">{{review}}</a>

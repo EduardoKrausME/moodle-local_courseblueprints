@@ -4,8 +4,7 @@ Moodle local plugin for creating immutable, versioned institutional course templ
 
 - Component: `local_courseblueprints`
 - Location: `local/courseblueprints`
-- Release: `1.0.0`
-- Version: `2026101400`
+- Current release and build: see [`version.php`](version.php).
 - Minimum Moodle version: 4.5 LTS; Moodle 5.x is a compatibility target requiring CI/integration testing.
 - License: GPL-3.0-or-later
 

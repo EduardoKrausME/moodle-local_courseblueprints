@@ -39,7 +39,7 @@ if ($data = $form->get_data()) {
     $json = $form->get_file_content('manifestfile');
     $document = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
     if (!is_array($document)) {
-        throw new invalid_parameter_exception('Invalid JSON object');
+        throw new invalid_parameter_exception(get_string('invalidjson', 'local_courseblueprints'));
     }
     $validator = new \local_courseblueprints\local\import_export_validator();
     $errors = $validator->validate($document);
@@ -51,7 +51,7 @@ if ($data = $form->get_data()) {
         throw new moodle_exception('backupmissing', 'local_courseblueprints');
     }
     if (empty($document['backuphash']) && $backupfile) {
-        throw new moodle_exception('importinvalid', 'local_courseblueprints', '', 'Unexpected backup');
+        throw new moodle_exception('unexpectedbackup', 'local_courseblueprints');
     }
     $tmpfile = null;
     try {
@@ -65,7 +65,7 @@ if ($data = $form->get_data()) {
             }
         }
         $repo = new \local_courseblueprints\local\blueprint_repository();
-        $blueprintid = $repo->create($data->code, $data->name, 'Imported blueprint', $USER->id);
+        $blueprintid = $repo->create($data->code, $data->name, get_string('importedblueprint', 'local_courseblueprints'), $USER->id);
         $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
             $blueprintid,
             $USER->id,
