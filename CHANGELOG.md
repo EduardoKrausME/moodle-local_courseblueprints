@@ -2,6 +2,14 @@
 
 This changelog documents only the two most recent **published** releases of `local_courseblueprints`, verified on October 24, 2026. Each release is compared against its immediately preceding published Git tag. The October 20–21 `Mustache`, `Boilerplate Headers` and `-core_text` commits occurred after release `1.0.3` and are intentionally excluded.
 
+## 1.0.5 - 2026-10-30
+
+- Addressed marketplace review issues affecting blueprint forms, provisioning, event classes and supporting plugin files.
+- Normalized Mustache and PHP headers and replaced legacy `core_text` usage.
+- Updated the release workflow and removed installation walkthroughs from the README.
+
+**Full comparison:** [1.0.3...1.0.5](https://github.com/EduardoKrausME/moodle-local_courseblueprints/compare/1.0.3...1.0.5)
+
 ## [1.0.3] - 2026-10-15
 
 ### Added
