@@ -25,6 +25,16 @@
 namespace local_courseblueprints\local;
 
 
+use backup;
+use backup_controller;
+use backup_plan;
+use base_plan_exception;
+use context_system;
+use core\lock\lock_config;
+use moodle_exception;
+use stdClass;
+use stored_file;
+
 /**
  * Moodle-native backup adapter. No user information or grade history is included.
  *
@@ -41,23 +51,23 @@ class backup_adapter {
         require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
         $version = (new blueprint_repository())->version($versionid);
         if ($version->status !== 'draft' || !$version->sourcecourseid) {
-            throw new \moodle_exception('immutableversion', 'local_courseblueprints');
+            throw new moodle_exception('immutableversion', 'local_courseblueprints');
         }
-        $lock = \core\lock\lock_config::get_lock_factory('local_courseblueprints')->get_lock(
+        $lock = lock_config::get_lock_factory('local_courseblueprints')->get_lock(
             'capture_' . $versionid,
             60
         );
         if (!$lock) {
-            throw new \moodle_exception('lockfailed', 'local_courseblueprints');
+            throw new moodle_exception('lockfailed', 'local_courseblueprints');
         }
         $controller = null;
         try {
-            $controller = new \backup_controller(
-                \backup::TYPE_1COURSE,
+            $controller = new backup_controller(
+                backup::TYPE_1COURSE,
                 (int) $version->sourcecourseid,
-                \backup::FORMAT_MOODLE,
-                \backup::INTERACTIVE_NO,
-                \backup::MODE_GENERAL,
+                backup::FORMAT_MOODLE,
+                backup::INTERACTIVE_NO,
+                backup::MODE_GENERAL,
                 $userid
             );
             $plan = $controller->get_plan();
@@ -84,19 +94,19 @@ class backup_adapter {
                 blueprint_version_manager::canonical_json($before) !==
                     blueprint_version_manager::canonical_json($current)
             ) {
-                throw new \moodle_exception('sourcestale', 'local_courseblueprints');
+                throw new moodle_exception('sourcestale', 'local_courseblueprints');
             }
             $controller->execute_plan();
             $results = $controller->get_results();
             if (
                 empty($results['backup_destination']) ||
-                    !($results['backup_destination'] instanceof \stored_file)
+                    !($results['backup_destination'] instanceof stored_file)
             ) {
-                throw new \moodle_exception('backupfailed', 'local_courseblueprints');
+                throw new moodle_exception('backupfailed', 'local_courseblueprints');
             }
             $source = $results['backup_destination'];
             $fs = get_file_storage();
-            $context = \context_system::instance();
+            $context = context_system::instance();
             $old = $fs->get_file(
                 $context->id,
                 'local_courseblueprints',
@@ -130,10 +140,10 @@ class backup_adapter {
     /**
      * Some Moodle releases omit settings; optional features must not break capture.
      */
-    private function optional_setting(\backup_plan $plan, string $name) {
+    private function optional_setting(backup_plan $plan, string $name) {
         try {
             return $plan->get_setting($name);
-        } catch (\base_plan_exception $e) {
+        } catch (base_plan_exception $e) {
             return null;
         }
     }
@@ -141,10 +151,10 @@ class backup_adapter {
     /**
      * Find only the version's private stored file.
      */
-    public function get_artifact(int $versionid): \stored_file {
+    public function get_artifact(int $versionid): stored_file {
         $fs = get_file_storage();
         $stored = $fs->get_file(
-            \context_system::instance()->id,
+            context_system::instance()->id,
             'local_courseblueprints',
             'artifact',
             $versionid,
@@ -152,7 +162,7 @@ class backup_adapter {
             'blueprint.mbz'
         );
         if (!$stored) {
-            throw new \moodle_exception('backupmissing', 'local_courseblueprints');
+            throw new moodle_exception('backupmissing', 'local_courseblueprints');
         }
         return $stored;
     }
@@ -160,7 +170,7 @@ class backup_adapter {
     /**
      * Hash full file contents, not Moodle's SHA-1 content-addressed storage key.
      */
-    public function sha256(\stored_file $stored): string {
+    public function sha256(stored_file $stored): string {
         $stream = $stored->get_content_file_handle();
         try {
             $context = hash_init('sha256');
@@ -174,13 +184,13 @@ class backup_adapter {
     /**
      * Fail closed if someone replaced the published archive.
      */
-    public function verify_artifact(\stdClass $version): void {
+    public function verify_artifact(stdClass $version): void {
         $file = $this->get_artifact((int) $version->id);
         if (
             empty($version->backuphash) ||
                 !hash_equals($version->backuphash, $this->sha256($file))
         ) {
-            throw new \moodle_exception('integrityfailure', 'local_courseblueprints');
+            throw new moodle_exception('integrityfailure', 'local_courseblueprints');
         }
     }
 }

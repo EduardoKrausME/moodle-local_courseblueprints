@@ -25,6 +25,10 @@
 namespace local_courseblueprints\local;
 
 
+use invalid_parameter_exception;
+use moodle_exception;
+use stdClass;
+
 /**
  * Persistence for stable blueprint identities and revision records.
  *
@@ -40,10 +44,10 @@ class blueprint_repository {
         global $DB;
         $code = clean_param($code, PARAM_ALPHANUMEXT);
         if ($code === '' || trim($name) === '') {
-            throw new \invalid_parameter_exception(get_string('invalidblueprintidentity', 'local_courseblueprints'));
+            throw new invalid_parameter_exception(get_string('invalidblueprintidentity', 'local_courseblueprints'));
         }
         if ($DB->record_exists('local_courseblueprints_bp', ['code' => $code])) {
-            throw new \moodle_exception('duplicatecode', 'local_courseblueprints');
+            throw new moodle_exception('duplicatecode', 'local_courseblueprints');
         }
         $now = time();
         return $DB->insert_record('local_courseblueprints_bp', (object) [
@@ -55,7 +59,7 @@ class blueprint_repository {
     /**
      * Return only pinned blueprint identity.
      */
-    public function get(int $id): \stdClass {
+    public function get(int $id): stdClass {
         global $DB;
         return $DB->get_record('local_courseblueprints_bp', ['id' => $id], '*', MUST_EXIST);
     }
@@ -79,7 +83,7 @@ class blueprint_repository {
     /**
      * Fetch a specific revision.
      */
-    public function version(int $id): \stdClass {
+    public function version(int $id): stdClass {
         global $DB;
         return $DB->get_record('local_courseblueprints_ver', ['id' => $id], '*', MUST_EXIST);
     }

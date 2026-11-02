@@ -22,6 +22,11 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\form\import_form;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\import_export_validator;
+
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
@@ -30,7 +35,7 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/courseblueprints/import.php'));
 $PAGE->set_title(get_string('import', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('import', 'local_courseblueprints'));
-$form = new \local_courseblueprints\form\import_form();
+$form = new import_form();
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/local/courseblueprints/index.php'));
 }
@@ -41,7 +46,7 @@ if ($data = $form->get_data()) {
     if (!is_array($document)) {
         throw new invalid_parameter_exception(get_string('invalidjson', 'local_courseblueprints'));
     }
-    $validator = new \local_courseblueprints\local\import_export_validator();
+    $validator = new import_export_validator();
     $errors = $validator->validate($document);
     if ($errors) {
         throw new moodle_exception('importinvalid', 'local_courseblueprints', '', implode(', ', $errors));
@@ -64,10 +69,10 @@ if ($data = $form->get_data()) {
                 throw new moodle_exception('integrityfailure', 'local_courseblueprints');
             }
         }
-        $repo = new \local_courseblueprints\local\blueprint_repository();
-        $blueprintid = $repo->create($data->code, $data->name, 
-                                     get_string('importedblueprint', 'local_courseblueprints'), $USER->id);
-        $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
+        $repo = new blueprint_repository();
+        $blueprintid = $repo->create($data->code, $data->name,
+            get_string('importedblueprint', 'local_courseblueprints'), $USER->id);
+        $versionid = (new blueprint_version_manager())->create_revision(
             $blueprintid,
             $USER->id,
             $document['structure'],

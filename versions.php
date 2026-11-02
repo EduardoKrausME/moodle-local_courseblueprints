@@ -22,6 +22,13 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\task\manager;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\course_structure_collector;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\task\capture_blueprint_task;
+
 require_once(__DIR__ . '/../../config.php');
 
 $id = required_param('id', PARAM_INT);
@@ -30,14 +37,14 @@ $context = context_system::instance();
 require_capability('local/courseblueprints:view', $context);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/courseblueprints/versions.php', ['id' => $id]));
-$repo = new \local_courseblueprints\local\blueprint_repository();
+$repo = new blueprint_repository();
 $blueprint = $repo->get($id);
 $PAGE->set_title(format_string($blueprint->name));
 $PAGE->set_heading(format_string($blueprint->name));
 
 $action = optional_param('action', '', PARAM_ALPHA);
 $versionid = optional_param('versionid', 0, PARAM_INT);
-$manager = new \local_courseblueprints\local\blueprint_version_manager();
+$manager = new blueprint_version_manager();
 $canpublish = has_capability('local/courseblueprints:publish', $context);
 $cancreate = has_capability('local/courseblueprints:create', $context);
 if ($action && $versionid) {
@@ -60,8 +67,8 @@ if ($action && $versionid) {
         $source = $version->sourcecourseid ? (int) $version->sourcecourseid : null;
         if ($source) {
             require_capability('moodle/backup:backupcourse', context_course::instance($source));
-            $structure = (new \local_courseblueprints\local\course_structure_collector())->collect($source);
-            $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
+            $structure = (new course_structure_collector())->collect($source);
+            $manifest = (new dependency_checker())->manifest($structure);
         } else {
             if ($version->backuphash) {
                 throw new moodle_exception('revisionimportunsupported', 'local_courseblueprints');
@@ -71,9 +78,9 @@ if ($action && $versionid) {
         }
         $newid = $manager->create_revision($id, $USER->id, $structure, $manifest, $source);
         if ($source) {
-            $task = new \local_courseblueprints\task\capture_blueprint_task();
+            $task = new capture_blueprint_task();
             $task->set_custom_data(['versionid' => $newid, 'userid' => $USER->id]);
-            \core\task\manager::queue_adhoc_task($task, true);
+            manager::queue_adhoc_task($task, true);
         }
         redirect($PAGE->url, get_string('createddraft', 'local_courseblueprints'));
     }
@@ -86,7 +93,7 @@ $versionstatuses = [
 $versionrows = [];
 foreach ($repo->versions($id) as $version) {
     $manifest = json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR);
-    $issues = (new \local_courseblueprints\local\dependency_checker())->check($manifest);
+    $issues = (new dependency_checker())->check($manifest);
     $versionrows[] = [
         'revision' => $version->revision, 'status' => $versionstatuses[$version->status] ?? s($version->status),
         'id' => $version->id, 'reviewed' => (bool) $version->reviewed,

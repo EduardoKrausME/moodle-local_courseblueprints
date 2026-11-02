@@ -22,6 +22,12 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\form\review_form;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\local\privacy_guard;
+
 require_once(__DIR__ . '/../../config.php');
 
 $id = required_param('id', PARAM_INT);
@@ -31,12 +37,12 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/courseblueprints/review.php', ['id' => $id]));
 $PAGE->set_title(get_string('review', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('review', 'local_courseblueprints'));
-$repo = new \local_courseblueprints\local\blueprint_repository();
+$repo = new blueprint_repository();
 $version = $repo->version($id);
 if ($version->status !== 'draft') {
     throw new moodle_exception('immutableversion', 'local_courseblueprints');
 }
-$form = new \local_courseblueprints\form\review_form(null, ['versionid' => $id]);
+$form = new review_form(null, ['versionid' => $id]);
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/local/courseblueprints/versions.php', ['id' => $version->blueprintid]));
 }
@@ -45,7 +51,7 @@ if ($data = $form->get_data()) {
     if ((int) $data->versionid !== $id) {
         throw new moodle_exception('invalidversion', 'local_courseblueprints');
     }
-    (new \local_courseblueprints\local\blueprint_version_manager())->set_review(
+    (new blueprint_version_manager())->set_review(
         $id,
         (bool) $data->reviewed,
         $data->reviewnotes
@@ -53,8 +59,8 @@ if ($data = $form->get_data()) {
     redirect(new moodle_url('/local/courseblueprints/versions.php', ['id' => $version->blueprintid]));
 }
 $structure = json_decode($version->structure, true, 512, JSON_THROW_ON_ERROR);
-$warnings = (new \local_courseblueprints\local\privacy_guard())->inspect($structure);
-$warnings = array_merge($warnings, (new \local_courseblueprints\local\dependency_checker())->check(
+$warnings = (new privacy_guard())->inspect($structure);
+$warnings = array_merge($warnings, (new dependency_checker())->check(
     json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR)
 ));
 echo $OUTPUT->header();

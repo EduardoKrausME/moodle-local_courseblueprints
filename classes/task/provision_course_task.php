@@ -25,6 +25,9 @@
 namespace local_courseblueprints\task;
 
 
+use core\task\adhoc_task;
+use local_courseblueprints\local\provisioning_service;
+
 /**
  * Async single-course provisioning worker.
  *
@@ -32,7 +35,7 @@ namespace local_courseblueprints\task;
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provision_course_task extends \core\task\adhoc_task {
+class provision_course_task extends adhoc_task {
     /**
      * Return the requested value.
      *
@@ -47,6 +50,6 @@ class provision_course_task extends \core\task\adhoc_task {
      */
     public function execute(): void {
         $data = $this->get_custom_data();
-        (new \local_courseblueprints\local\provisioning_service())->execute((int) $data->itemid);
+        (new provisioning_service())->execute((int) $data->itemid);
     }
 }

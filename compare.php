@@ -22,6 +22,8 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\local\course_comparison_service;
+
 require_once(__DIR__ . '/../../config.php');
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -32,7 +34,7 @@ $PAGE->set_context(context_course::instance($courseid));
 $PAGE->set_url(new moodle_url('/local/courseblueprints/compare.php', ['courseid' => $courseid]));
 $PAGE->set_title(get_string('compare', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('compare', 'local_courseblueprints'));
-$report = (new \local_courseblueprints\local\course_comparison_service())->compare_course($courseid);
+$report = (new course_comparison_service())->compare_course($courseid);
 $differences = [];
 foreach ($report as $item) {
     $differences[] = ['type' => s($item['type']), 'detail' => s($item['detail'])];

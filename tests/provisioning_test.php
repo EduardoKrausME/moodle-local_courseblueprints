@@ -25,6 +25,14 @@
 namespace local_courseblueprints;
 
 
+use advanced_testcase;
+use invalid_parameter_exception;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\course_structure_collector;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\local\provisioning_service;
+
 /**
  * Parameterization and idempotent queuing tests.
  *
@@ -33,7 +41,7 @@ namespace local_courseblueprints;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \local_courseblueprints\local\provisioning_service
  */
-final class provisioning_test extends \advanced_testcase {
+final class provisioning_test extends advanced_testcase {
     /**
      * Repeated batch request must return the existing run ID without duplicating rows.
      */
@@ -43,15 +51,15 @@ final class provisioning_test extends \advanced_testcase {
         $this->setAdminUser();
         $user = get_admin();
         $category = $this->getDataGenerator()->create_category();
-        $repo = new \local_courseblueprints\local\blueprint_repository();
+        $repo = new blueprint_repository();
         $blueprintid = $repo->create('idempotencytest', 'Idempotency', '', $user->id);
-        $manager = new \local_courseblueprints\local\blueprint_version_manager();
-        $structure = (new \local_courseblueprints\local\course_structure_collector())->from_initial(['sections' => 2]);
-        $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
+        $manager = new blueprint_version_manager();
+        $structure = (new course_structure_collector())->from_initial(['sections' => 2]);
+        $manifest = (new dependency_checker())->manifest($structure);
         $versionid = $manager->create_revision($blueprintid, $user->id, $structure, $manifest);
         $manager->set_review($versionid, true, 'Checked initial blank configuration');
         $manager->publish($versionid);
-        $service = new \local_courseblueprints\local\provisioning_service();
+        $service = new provisioning_service();
         $key = hash('sha256', 'same-request');
         $targets = [['categoryid' => $category->id, 'fullname' => 'Test blueprint course',
             'shortname' => 'TEST-BLUEPRINT-001', 'startdate' => 0, 'enddate' => 0]];
@@ -70,15 +78,15 @@ final class provisioning_test extends \advanced_testcase {
         $this->setAdminUser();
         $admin = get_admin();
         $category = $this->getDataGenerator()->create_category();
-        $repo = new \local_courseblueprints\local\blueprint_repository();
+        $repo = new blueprint_repository();
         $blueprintid = $repo->create('crashrecover', 'Recovery', '', $admin->id);
-        $manager = new \local_courseblueprints\local\blueprint_version_manager();
-        $structure = (new \local_courseblueprints\local\course_structure_collector())->from_initial(['sections' => 1]);
-        $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
+        $manager = new blueprint_version_manager();
+        $structure = (new course_structure_collector())->from_initial(['sections' => 1]);
+        $manifest = (new dependency_checker())->manifest($structure);
         $version = $manager->create_revision($blueprintid, $admin->id, $structure, $manifest);
         $manager->set_review($version, true, 'Manually inspected empty initial configuration');
         $manager->publish($version);
-        $service = new \local_courseblueprints\local\provisioning_service();
+        $service = new provisioning_service();
         $run = $service->enqueue($version, [[
             'categoryid' => $category->id, 'fullname' => 'Target', 'shortname' => 'CBRECOVERY',
         ]], hash('sha256', 'crash'), $admin->id);
@@ -97,8 +105,8 @@ final class provisioning_test extends \advanced_testcase {
      * Validate dates and course names before scheduling tasks.
      */
     public function test_invalid_parameterization_rejected(): void {
-        $this->expectException(\invalid_parameter_exception::class);
-        (new \local_courseblueprints\local\provisioning_service())->normalize([
+        $this->expectException(invalid_parameter_exception::class);
+        (new provisioning_service())->normalize([
             'categoryid' => 1, 'fullname' => 'Course', 'shortname' => 'C-1',
             'startdate' => 200, 'enddate' => 100,
         ]);

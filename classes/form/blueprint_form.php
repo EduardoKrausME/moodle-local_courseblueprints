@@ -24,6 +24,9 @@
 
 namespace local_courseblueprints\form;
 
+use context_course;
+use moodleform;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($GLOBALS['CFG']->libdir . '/formslib.php');
 
@@ -34,7 +37,7 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class blueprint_form extends \moodleform {
+class blueprint_form extends moodleform {
     /**
      * Form API definition.
      */
@@ -78,7 +81,7 @@ class blueprint_form extends \moodleform {
                 $errors['sourcecourseid'] = get_string('required');
             } else {
                 $course = get_course((int) $data['sourcecourseid']);
-                if (!has_capability('moodle/backup:backupcourse', \context_course::instance($course->id))) {
+                if (!has_capability('moodle/backup:backupcourse', context_course::instance($course->id))) {
                     $errors['sourcecourseid'] = get_string('nopermissions', 'error', 'moodle/backup:backupcourse');
                 }
             }

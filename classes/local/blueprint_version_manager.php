@@ -25,6 +25,12 @@
 namespace local_courseblueprints\local;
 
 
+use context_system;
+use core\lock\lock_config;
+use invalid_parameter_exception;
+use local_courseblueprints\event\blueprint_published;
+use moodle_exception;
+
 /**
  * Version creation, publication and archive transitions.
  *
@@ -68,10 +74,10 @@ class blueprint_version_manager {
         global $DB;
         $repo = new blueprint_repository();
         $repo->get($blueprintid);
-        $factory = \core\lock\lock_config::get_lock_factory('local_courseblueprints');
+        $factory = lock_config::get_lock_factory('local_courseblueprints');
         $lock = $factory->get_lock('revision_' . $blueprintid, 30);
         if (!$lock) {
-            throw new \moodle_exception('lockfailed', 'local_courseblueprints');
+            throw new moodle_exception('lockfailed', 'local_courseblueprints');
         }
         try {
             $revision = (int) $DB->get_field_sql(
@@ -101,10 +107,10 @@ class blueprint_version_manager {
         global $DB, $USER;
         $version = (new blueprint_repository())->version($versionid);
         if ($version->status !== 'draft') {
-            throw new \moodle_exception('immutableversion', 'local_courseblueprints');
+            throw new moodle_exception('immutableversion', 'local_courseblueprints');
         }
         if (trim($notes) === '') {
-            throw new \invalid_parameter_exception(get_string('invalidreviewrecord', 'local_courseblueprints'));
+            throw new invalid_parameter_exception(get_string('invalidreviewrecord', 'local_courseblueprints'));
         }
         $DB->update_record('local_courseblueprints_ver', (object) [
             'id' => $versionid, 'reviewed' => (int) $approved, 'reviewnotes' => trim($notes),
@@ -119,10 +125,10 @@ class blueprint_version_manager {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);
         if ($version->status !== 'draft') {
-            throw new \moodle_exception('immutableversion', 'local_courseblueprints');
+            throw new moodle_exception('immutableversion', 'local_courseblueprints');
         }
         if (!$version->reviewed) {
-            throw new \moodle_exception('reviewrequired', 'local_courseblueprints');
+            throw new moodle_exception('reviewrequired', 'local_courseblueprints');
         }
         $manifest = json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR);
         $structure = json_decode($version->structure, true, 512, JSON_THROW_ON_ERROR);
@@ -130,14 +136,14 @@ class blueprint_version_manager {
             'structure' => $structure, 'manifest' => $manifest,
         ]));
         if (!hash_equals($expectedhash, $version->contenthash)) {
-            throw new \moodle_exception('integrityfailure', 'local_courseblueprints');
+            throw new moodle_exception('integrityfailure', 'local_courseblueprints');
         }
         if (empty($version->backuphash) && !empty($structure['activities'])) {
-            throw new \moodle_exception('backupmissing', 'local_courseblueprints');
+            throw new moodle_exception('backupmissing', 'local_courseblueprints');
         }
         $results = (new dependency_checker())->check($manifest);
         if ($results) {
-            throw new \moodle_exception('missingdependencies', 'local_courseblueprints');
+            throw new moodle_exception('missingdependencies', 'local_courseblueprints');
         }
         if ($version->sourcecourseid || $version->backuphash) {
             (new backup_adapter())->verify_artifact($version);
@@ -145,8 +151,8 @@ class blueprint_version_manager {
         $DB->update_record('local_courseblueprints_ver', (object) [
             'id' => $versionid, 'status' => 'published', 'publishedat' => time(),
         ]);
-        \local_courseblueprints\event\blueprint_published::create([
-            'context' => \context_system::instance(), 'objectid' => $versionid,
+        blueprint_published::create([
+            'context' => context_system::instance(), 'objectid' => $versionid,
             'other' => ['blueprintid' => (int) $version->blueprintid],
         ])->trigger();
     }
@@ -158,7 +164,7 @@ class blueprint_version_manager {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);
         if ($version->status !== 'published') {
-            throw new \moodle_exception('immutableversion', 'local_courseblueprints');
+            throw new moodle_exception('immutableversion', 'local_courseblueprints');
         }
         $DB->update_record('local_courseblueprints_ver', (object) ['id' => $versionid, 'status' => 'archived']);
     }

@@ -24,6 +24,8 @@
 
 namespace local_courseblueprints\form;
 
+use moodleform;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($GLOBALS['CFG']->libdir . '/formslib.php');
 
@@ -34,7 +36,7 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class import_form extends \moodleform {
+class import_form extends moodleform {
     /**
      * Form API definition.
      */

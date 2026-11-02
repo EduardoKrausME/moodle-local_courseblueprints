@@ -25,10 +25,13 @@
 namespace local_courseblueprints\event;
 
 
+use core\event\base;
+use moodle_url;
+
 /**
  * Publication of one reviewed revision.
  */
-class blueprint_published extends \core\event\base {
+class blueprint_published extends base {
     /**
      * Event metadata.
      */
@@ -59,10 +62,10 @@ class blueprint_published extends \core\event\base {
     /**
      * Return the requested value.
      *
-     * @return \moodle_url
+     * @return moodle_url
      */
-    public function get_url(): \moodle_url {
-        return new \moodle_url(
+    public function get_url(): moodle_url {
+        return new moodle_url(
             '/local/courseblueprints/versions.php',
             ['id' => $this->other['blueprintid']]
         );

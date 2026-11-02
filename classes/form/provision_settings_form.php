@@ -24,6 +24,9 @@
 
 namespace local_courseblueprints\form;
 
+use core_course_category;
+use moodleform;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($GLOBALS['CFG']->libdir . '/formslib.php');
 
@@ -34,7 +37,7 @@ require_once($GLOBALS['CFG']->libdir . '/formslib.php');
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provision_settings_form extends \moodleform {
+class provision_settings_form extends moodleform {
     /**
      * Form API definition.
      */
@@ -46,7 +49,7 @@ class provision_settings_form extends \moodleform {
             'select',
             'categoryid',
             get_string('category', 'local_courseblueprints'),
-            \core_course_category::make_categories_list('moodle/course:create')
+            core_course_category::make_categories_list('moodle/course:create')
         );
         $mform->addRule('categoryid', null, 'required');
         $mform->addElement('text', 'fullname', get_string('fullname', 'local_courseblueprints'), ['size' => 60]);

@@ -25,6 +25,9 @@
 namespace local_courseblueprints\local;
 
 
+use core_component;
+use JsonException;
+
 /**
  * Dependencies must be explicit and cannot be skipped during provisioning.
  *
@@ -54,7 +57,7 @@ class dependency_checker {
                     continue;
                 }
                 $this->availability_dependencies($rule, $required, $unsupported);
-            } catch (\JsonException $e) {
+            } catch (JsonException $e) {
                 $unsupported[] = 'availability_invalid';
             }
         }
@@ -112,7 +115,7 @@ class dependency_checker {
                 $issues[] = 'invalid_component';
                 continue;
             }
-            $directory = \core_component::get_component_directory($component);
+            $directory = core_component::get_component_directory($component);
             if (!$directory || !is_dir($directory)) {
                 $issues[] = 'missing:' . $component;
                 continue;

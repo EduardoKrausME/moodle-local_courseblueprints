@@ -25,6 +25,8 @@
 namespace local_courseblueprints\local;
 
 
+use stdClass;
+
 /**
  * Conservative JSON schema and exported payload verifier.
  *
@@ -72,7 +74,7 @@ class import_export_validator {
     /**
      * Export manifest-only JSON, never personal data or user records.
      */
-    public function export(\stdClass $version): string {
+    public function export(stdClass $version): string {
         return blueprint_version_manager::canonical_json([
             'schema' => 1, 'revision' => (int) $version->revision,
             'structure' => json_decode($version->structure, true, 512, JSON_THROW_ON_ERROR),

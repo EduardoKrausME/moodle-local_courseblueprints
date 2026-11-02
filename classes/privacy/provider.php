@@ -24,10 +24,17 @@
 
 namespace local_courseblueprints\privacy;
 
+use context;
+use context_system;
 use core_privacy\local\metadata\collection as metadata_collection;
 use core_privacy\local\metadata\provider as metadata_provider;
+use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\contextlist;
 use core_privacy\local\request\core_userlist_provider;
 use core_privacy\local\request\plugin\provider as request_provider;
+use core_privacy\local\request\userlist;
+use core_privacy\local\request\writer;
 
 
 /**
@@ -58,16 +65,16 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Data is attached only to site-level administrator operations.
      */
-    public static function get_contexts_for_userid(int $userid): \core_privacy\local\request\contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         global $DB;
-        $contexts = new \core_privacy\local\request\contextlist();
+        $contexts = new contextlist();
         if (
             $DB->record_exists('local_courseblueprints_bp', ['ownerid' => $userid]) ||
                 $DB->record_exists('local_courseblueprints_ver', ['authorid' => $userid]) ||
                 $DB->record_exists('local_courseblueprints_ver', ['reviewerid' => $userid]) ||
                 $DB->record_exists('local_courseblueprints_run', ['userid' => $userid])
         ) {
-            $contexts->add_context(\context_system::instance()->id);
+            $contexts->add_context(context_system::instance()->id);
         }
         return $contexts;
     }
@@ -75,7 +82,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Export only the requesting user's authorship and operations.
      */
-    public static function export_user_data(\core_privacy\local\request\approved_contextlist $contextlist): void {
+    public static function export_user_data(approved_contextlist $contextlist): void {
         global $DB;
         $userid = $contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
@@ -87,7 +94,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
                 'versions' => array_values($DB->get_records('local_courseblueprints_ver', ['authorid' => $userid])),
                 'runs' => array_values($DB->get_records('local_courseblueprints_run', ['userid' => $userid])),
             ];
-            \core_privacy\local\request\writer::with_context($context)->export_data([
+            writer::with_context($context)->export_data([
                 get_string('pluginname', 'local_courseblueprints')], $data);
         }
     }
@@ -95,7 +102,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Site-wide privacy erasure may remove institutional audit ownership.
      */
-    public static function delete_data_for_all_users_in_context(\context $context): void {
+    public static function delete_data_for_all_users_in_context(context $context): void {
         global $DB;
         if ($context->contextlevel !== CONTEXT_SYSTEM) {
             return;
@@ -109,7 +116,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Remove author identity while retaining courses, versions and idempotency records.
      */
-    public static function delete_data_for_user(\core_privacy\local\request\approved_contextlist $contextlist): void {
+    public static function delete_data_for_user(approved_contextlist $contextlist): void {
         global $DB;
         $userid = $contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
@@ -131,7 +138,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Add users referenced in institutional history to the privacy request.
      */
-    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist): void {
+    public static function get_users_in_context(userlist $userlist): void {
         global $DB;
         $context = $userlist->get_context();
         if ($context->contextlevel !== CONTEXT_SYSTEM) {
@@ -152,7 +159,7 @@ class provider implements core_userlist_provider, metadata_provider, request_pro
     /**
      * Erase an approved selection of user identities.
      */
-    public static function delete_data_for_users(\core_privacy\local\request\approved_userlist $userlist): void {
+    public static function delete_data_for_users(approved_userlist $userlist): void {
         global $DB;
         if ($userlist->get_context()->contextlevel !== CONTEXT_SYSTEM) {
             return;

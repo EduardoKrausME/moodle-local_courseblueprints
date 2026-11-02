@@ -22,6 +22,8 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\local\blueprint_repository;
+
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
@@ -32,7 +34,7 @@ $PAGE->set_url(new moodle_url('/local/courseblueprints/index.php'));
 $PAGE->set_title(get_string('pluginname', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('pluginname', 'local_courseblueprints'));
 
-$repo = new \local_courseblueprints\local\blueprint_repository();
+$repo = new blueprint_repository();
 $cancreate = has_capability('local/courseblueprints:create', $context);
 $canprovision = has_capability('local/courseblueprints:provision', $context);
 $blueprints = [];

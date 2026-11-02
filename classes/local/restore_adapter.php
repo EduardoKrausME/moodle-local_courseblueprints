@@ -25,6 +25,12 @@
 namespace local_courseblueprints\local;
 
 
+use backup;
+use base_plan_exception;
+use moodle_exception;
+use restore_controller;
+use stdClass;
+
 /**
  * Native Moodle restore with controlled temporary-file cleanup.
  *
@@ -36,7 +42,7 @@ class restore_adapter {
     /**
      * Restore the version archive into a newly created empty course.
      */
-    public function restore(\stdClass $version, int $courseid, int $userid): void {
+    public function restore(stdClass $version, int $courseid, int $userid): void {
         global $CFG;
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
         $backup = new backup_adapter();
@@ -49,16 +55,16 @@ class restore_adapter {
             $backup->get_artifact((int) $version->id)->copy_content_to($path);
             $packer = get_file_packer('application/vnd.moodle.backup');
             if (!$packer->extract_to_pathname($path, $directory)) {
-                throw new \moodle_exception('restorefailed', 'local_courseblueprints');
+                throw new moodle_exception('restorefailed', 'local_courseblueprints');
             }
             unlink($path);
-            $controller = new \restore_controller(
+            $controller = new restore_controller(
                 $restoreid,
                 $courseid,
-                \backup::INTERACTIVE_NO,
-                \backup::MODE_GENERAL,
+                backup::INTERACTIVE_NO,
+                backup::MODE_GENERAL,
                 $userid,
-                \backup::TARGET_CURRENT_ADDING
+                backup::TARGET_CURRENT_ADDING
             );
             $plan = $controller->get_plan();
             foreach (
@@ -68,13 +74,13 @@ class restore_adapter {
                 try {
                     $setting = $plan->get_setting($name);
                     $setting->set_value(0);
-                } catch (\base_plan_exception $e) {
+                } catch (base_plan_exception $e) {
                     // Optional restore settings can be absent across Moodle versions.
                     continue;
                 }
             }
             if (!$controller->execute_precheck()) {
-                throw new \moodle_exception('restorefailed', 'local_courseblueprints');
+                throw new moodle_exception('restorefailed', 'local_courseblueprints');
             }
             $controller->execute_plan();
         } finally {

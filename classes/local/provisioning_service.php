@@ -25,6 +25,19 @@
 namespace local_courseblueprints\local;
 
 
+use context_course;
+use context_coursecat;
+use context_system;
+use core\lock\lock_config;
+use core\task\manager;
+use invalid_parameter_exception;
+use local_courseblueprints\event\course_provisioned;
+use local_courseblueprints\task\provision_course_task;
+use moodle_exception;
+use required_capability_exception;
+use stdClass;
+use Throwable;
+
 /**
  * Resumable, lock-protected provisioning. Existing courses are never deleted.
  *
@@ -49,7 +62,7 @@ class provisioning_service {
                 strlen($data['fullname']) > 254 || strlen($data['shortname']) > 254 ||
                 ($data['enddate'] && $data['startdate'] > $data['enddate'])
         ) {
-            throw new \invalid_parameter_exception(get_string('invalidprovisionparams', 'local_courseblueprints'));
+            throw new invalid_parameter_exception(get_string('invalidprovisionparams', 'local_courseblueprints'));
         }
         return $data;
     }
@@ -61,17 +74,17 @@ class provisioning_service {
         global $DB;
         $version = (new blueprint_repository())->version($versionid);
         if ($version->status !== 'published') {
-            throw new \moodle_exception('unpublishedversion', 'local_courseblueprints');
+            throw new moodle_exception('unpublishedversion', 'local_courseblueprints');
         }
         if (!preg_match('/^[a-f0-9]{64}$/D', $requestkey) || !$targets || count($targets) > 100) {
-            throw new \invalid_parameter_exception(get_string('invalidrequestkey', 'local_courseblueprints'));
+            throw new invalid_parameter_exception(get_string('invalidrequestkey', 'local_courseblueprints'));
         }
         if ((new dependency_checker())->check(json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR))) {
-            throw new \moodle_exception('missingdependencies', 'local_courseblueprints');
+            throw new moodle_exception('missingdependencies', 'local_courseblueprints');
         }
-        $lock = \core\lock\lock_config::get_lock_factory('local_courseblueprints')->get_lock('batch_' . $requestkey, 30);
+        $lock = lock_config::get_lock_factory('local_courseblueprints')->get_lock('batch_' . $requestkey, 30);
         if (!$lock) {
-            throw new \moodle_exception('lockfailed', 'local_courseblueprints');
+            throw new moodle_exception('lockfailed', 'local_courseblueprints');
         }
         try {
             $data = array_map([$this, 'normalize'], $targets);
@@ -84,20 +97,20 @@ class provisioning_service {
                     (int) $existing->versionid !== $versionid || (int) $existing->userid !== $userid ||
                         !hash_equals($existing->requesthash, $requesthash)
                 ) {
-                    throw new \moodle_exception('idempotencyconflict', 'local_courseblueprints');
+                    throw new moodle_exception('idempotencyconflict', 'local_courseblueprints');
                 }
                 return (int) $existing->id;
             }
             foreach ($data as $target) {
-                $context = \context_coursecat::instance($target['categoryid']);
+                $context = context_coursecat::instance($target['categoryid']);
                 if (
-                    !has_capability('local/courseblueprints:provision', \context_system::instance(), $userid) ||
+                    !has_capability('local/courseblueprints:provision', context_system::instance(), $userid) ||
                         !has_capability('moodle/course:create', $context, $userid)
                 ) {
-                    throw new \required_capability_exception($context, 'moodle/course:create', 'nopermissions', '');
+                    throw new required_capability_exception($context, 'moodle/course:create', 'nopermissions', '');
                 }
                 if ($DB->record_exists('course', ['shortname' => $target['shortname']])) {
-                    throw new \moodle_exception('shortnameexists', 'local_courseblueprints');
+                    throw new moodle_exception('shortnameexists', 'local_courseblueprints');
                 }
             }
             $transaction = $DB->start_delegated_transaction();
@@ -111,9 +124,9 @@ class provisioning_service {
                     'params' => '{}', 'status' => 'queued', 'attempts' => 0,
                     'timecreated' => time(), 'timemodified' => time(),
                 ]));
-                $task = new \local_courseblueprints\task\provision_course_task();
+                $task = new provision_course_task();
                 $task->set_custom_data(['itemid' => $itemid]);
-                \core\task\manager::queue_adhoc_task($task, true);
+                manager::queue_adhoc_task($task, true);
             }
             $transaction->allow_commit();
             return $runid;
@@ -128,9 +141,9 @@ class provisioning_service {
     public function execute(int $itemid): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
-        $lock = \core\lock\lock_config::get_lock_factory('local_courseblueprints')->get_lock('item_' . $itemid, 30);
+        $lock = lock_config::get_lock_factory('local_courseblueprints')->get_lock('item_' . $itemid, 30);
         if (!$lock) {
-            throw new \moodle_exception('lockfailed', 'local_courseblueprints');
+            throw new moodle_exception('lockfailed', 'local_courseblueprints');
         }
         try {
             $item = $DB->get_record('local_courseblueprints_itm', ['id' => $itemid], '*', MUST_EXIST);
@@ -139,15 +152,15 @@ class provisioning_service {
             }
             $version = (new blueprint_repository())->version((int) $item->versionid);
             if (!in_array($version->status, ['published', 'archived'], true)) {
-                throw new \moodle_exception('unpublishedversion', 'local_courseblueprints');
+                throw new moodle_exception('unpublishedversion', 'local_courseblueprints');
             }
             $run = $DB->get_record('local_courseblueprints_run', ['id' => $item->runid], '*', MUST_EXIST);
-            $categorycontext = \context_coursecat::instance((int) $item->categoryid);
+            $categorycontext = context_coursecat::instance((int) $item->categoryid);
             if (
-                !has_capability('local/courseblueprints:provision', \context_system::instance(), $run->userid) ||
+                !has_capability('local/courseblueprints:provision', context_system::instance(), $run->userid) ||
                     !has_capability('moodle/course:create', $categorycontext, $run->userid)
             ) {
-                throw new \required_capability_exception(
+                throw new required_capability_exception(
                     $categorycontext,
                     'moodle/course:create',
                     'nopermissions',
@@ -180,7 +193,7 @@ class provisioning_service {
             $DB->set_field('local_courseblueprints_itm', 'attempts', $item->attempts, ['id' => $itemid]);
             $manifest = json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR);
             if ((new dependency_checker())->check($manifest)) {
-                throw new \moodle_exception('missingdependencies', 'local_courseblueprints');
+                throw new moodle_exception('missingdependencies', 'local_courseblueprints');
             }
             if ($version->backuphash) {
                 (new backup_adapter())->verify_artifact($version);
@@ -218,12 +231,12 @@ class provisioning_service {
                 'id' => $itemid, 'status' => empty($report) ? 'complete' : 'needs_review',
                 'validation' => json_encode($report, JSON_THROW_ON_ERROR), 'timemodified' => time(),
             ]);
-            \local_courseblueprints\event\course_provisioned::create([
-                'context' => \context_course::instance($course->id),
+            course_provisioned::create([
+                'context' => context_course::instance($course->id),
                 'objectid' => $course->id, 'relateduserid' => $run->userid,
                 'other' => ['versionid' => (int) $version->id],
             ])->trigger();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             if (isset($item)) {
                 $current = $DB->get_record('local_courseblueprints_itm', ['id' => $itemid]);
                 $status = ($current && $current->courseid) ? 'failed_review' : 'queued';
@@ -238,7 +251,7 @@ class provisioning_service {
     /**
      * Create empty sections via the Moodle course API.
      */
-    private function create_sections(\stdClass $course, array $structure): void {
+    private function create_sections(stdClass $course, array $structure): void {
         global $DB;
         $numbers = array_column($structure['sections'] ?? [], 'number');
         $numbers = array_filter(array_map('intval', $numbers), static function (int $number): bool {
@@ -261,7 +274,7 @@ class provisioning_service {
      * Persist an individual outcome, without deleting course data on failure.
      */
     private function record_status(
-        \stdClass $item,
+        stdClass $item,
         string $status,
         ?string $code = null,
         ?string $message = null

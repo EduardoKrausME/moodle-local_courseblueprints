@@ -25,6 +25,12 @@
 namespace local_courseblueprints;
 
 
+use advanced_testcase;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\local\import_export_validator;
+use local_courseblueprints\local\privacy_guard;
+
 /**
  * Dependency, sanitization and portability checks.
  *
@@ -35,12 +41,12 @@ namespace local_courseblueprints;
  * @covers \local_courseblueprints\local\privacy_guard
  * @covers \local_courseblueprints\local\import_export_validator
  */
-final class dependency_privacy_test extends \advanced_testcase {
+final class dependency_privacy_test extends advanced_testcase {
     /**
      * A missing module or unrecognized format is a publication blocker.
      */
     public function test_missing_dependencies_are_visible(): void {
-        $checker = new \local_courseblueprints\local\dependency_checker();
+        $checker = new dependency_checker();
         $issues = $checker->check(['schema' => 1, 'requires' => ['mod_impossiblecourseblueprintxyz'],
             'unsupported' => ['resource:personal_data']]);
         $this->assertContains('missing:mod_impossiblecourseblueprintxyz', $issues);
@@ -51,7 +57,7 @@ final class dependency_privacy_test extends \advanced_testcase {
      * Identifiable information in section-authored text blocks publication.
      */
     public function test_pii_heuristics_identify_email_and_cpf(): void {
-        $guard = new \local_courseblueprints\local\privacy_guard();
+        $guard = new privacy_guard();
         $found = $guard->inspect(['sections' => [['number' => 1,
             'summary' => '<p>Ana ana@example.org / 111.222.333-44</p>']]]);
         $this->assertContains('email:section:1', $found);
@@ -66,10 +72,10 @@ final class dependency_privacy_test extends \advanced_testcase {
             'activities' => [['section' => 1, 'modname' => 'forum', 'name' => 'Test']]];
         $manifest = ['schema' => 1, 'requires' => [], 'unsupported' => []];
         $document = ['schema' => 1, 'structure' => $structure, 'manifest' => $manifest,
-            'hash' => hash('sha256', \local_courseblueprints\local\blueprint_version_manager::canonical_json([
+            'hash' => hash('sha256', blueprint_version_manager::canonical_json([
                 'structure' => $structure, 'manifest' => $manifest,
             ]))];
-        $issues = (new \local_courseblueprints\local\import_export_validator())->validate($document);
+        $issues = (new import_export_validator())->validate($document);
         $this->assertContains('activities_without_backup', $issues);
     }
 
@@ -77,7 +83,7 @@ final class dependency_privacy_test extends \advanced_testcase {
      * JSON with tampered content is rejected, even if manifest remains valid.
      */
     public function test_import_catches_manifest_tampering(): void {
-        $validator = new \local_courseblueprints\local\import_export_validator();
+        $validator = new import_export_validator();
         $issues = $validator->validate([
             'schema' => 1, 'structure' => ['sections' => []],
             'manifest' => ['schema' => 1, 'requires' => [], 'unsupported' => []],

@@ -25,6 +25,9 @@
 namespace local_courseblueprints\event;
 
 
+use core\event\base;
+use moodle_url;
+
 /**
  * A provisioned course has a persistent original template revision.
  *
@@ -32,7 +35,7 @@ namespace local_courseblueprints\event;
  * @copyright 2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_provisioned extends \core\event\base {
+class course_provisioned extends base {
     /**
      * Setup common audit metadata.
      */
@@ -64,9 +67,9 @@ class course_provisioned extends \core\event\base {
     /**
      * Return the requested value.
      *
-     * @return \moodle_url
+     * @return moodle_url
      */
-    public function get_url(): \moodle_url {
-        return new \moodle_url('/course/view.php', ['id' => $this->objectid]);
+    public function get_url(): moodle_url {
+        return new moodle_url('/course/view.php', ['id' => $this->objectid]);
     }
 }

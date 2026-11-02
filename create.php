@@ -22,6 +22,15 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\task\manager;
+use local_courseblueprints\form\blueprint_form;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\course_structure_collector;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\local\privacy_guard;
+use local_courseblueprints\task\capture_blueprint_task;
+
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
@@ -31,29 +40,29 @@ $PAGE->set_url(new moodle_url('/local/courseblueprints/create.php'));
 $PAGE->set_title(get_string('createblueprint', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('createblueprint', 'local_courseblueprints'));
 
-$form = new \local_courseblueprints\form\blueprint_form();
+$form = new blueprint_form();
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/local/courseblueprints/index.php'));
 }
 if ($data = $form->get_data()) {
     require_sesskey();
     $sourceid = $data->mode === 'existing' ? (int) $data->sourcecourseid : null;
-    $collector = new \local_courseblueprints\local\course_structure_collector();
+    $collector = new course_structure_collector();
     if ($sourceid) {
         require_capability('moodle/backup:backupcourse', context_course::instance($sourceid));
         $structure = $collector->collect($sourceid);
     } else {
         $structure = $collector->from_initial(['format' => $data->format, 'sections' => $data->sections]);
     }
-    $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
-    $warnings = (new \local_courseblueprints\local\privacy_guard())->inspect($structure);
+    $manifest = (new dependency_checker())->manifest($structure);
+    $warnings = (new privacy_guard())->inspect($structure);
     if ($warnings) {
         $manifest['unsupported'] = array_merge($manifest['unsupported'], $warnings);
     }
     // Always require explicit manual review, even when heuristic scanners found nothing.
-    $repo = new \local_courseblueprints\local\blueprint_repository();
+    $repo = new blueprint_repository();
     $id = $repo->create($data->code, $data->name, $data->description, $USER->id);
-    $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
+    $versionid = (new blueprint_version_manager())->create_revision(
         $id,
         $USER->id,
         $structure,
@@ -61,9 +70,9 @@ if ($data = $form->get_data()) {
         $sourceid
     );
     if ($sourceid) {
-        $task = new \local_courseblueprints\task\capture_blueprint_task();
+        $task = new capture_blueprint_task();
         $task->set_custom_data(['versionid' => $versionid, 'userid' => $USER->id]);
-        \core\task\manager::queue_adhoc_task($task, true);
+        manager::queue_adhoc_task($task, true);
     }
     redirect(
         new moodle_url('/local/courseblueprints/versions.php', ['id' => $id]),

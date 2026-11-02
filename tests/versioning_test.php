@@ -25,6 +25,13 @@
 namespace local_courseblueprints;
 
 
+use advanced_testcase;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\blueprint_version_manager;
+use local_courseblueprints\local\course_structure_collector;
+use local_courseblueprints\local\dependency_checker;
+use moodle_exception;
+
 /**
  * Version and content immutability tests.
  *
@@ -33,7 +40,7 @@ namespace local_courseblueprints;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \local_courseblueprints\local\blueprint_version_manager
  */
-final class versioning_test extends \advanced_testcase {
+final class versioning_test extends advanced_testcase {
     /**
      * Published versions cannot be mutated.
      */
@@ -41,11 +48,11 @@ final class versioning_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
-        $repo = new \local_courseblueprints\local\blueprint_repository();
+        $repo = new blueprint_repository();
         $id = $repo->create('blueprint-A', 'Original', '', $user->id);
-        $manager = new \local_courseblueprints\local\blueprint_version_manager();
-        $structure = (new \local_courseblueprints\local\course_structure_collector())->from_initial(['sections' => 2]);
-        $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
+        $manager = new blueprint_version_manager();
+        $structure = (new course_structure_collector())->from_initial(['sections' => 2]);
+        $manifest = (new dependency_checker())->manifest($structure);
         $v1 = $manager->create_revision($id, $user->id, $structure, $manifest);
         $v2 = $manager->create_revision($id, $user->id, $structure, $manifest);
         $this->assertEquals(1, $repo->version($v1)->revision);
@@ -53,7 +60,7 @@ final class versioning_test extends \advanced_testcase {
         $manager->set_review($v1, true, 'Verified that this initial configuration contains no PII.');
         $manager->publish($v1);
         $this->assertEquals('published', $repo->version($v1)->status);
-        $this->expectException(\moodle_exception::class);
+        $this->expectException(moodle_exception::class);
         $manager->set_review($v1, true, 'Second alteration must not be possible');
     }
 
@@ -63,11 +70,11 @@ final class versioning_test extends \advanced_testcase {
     public function test_archiving_does_not_delete_revision(): void {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
-        $repo = new \local_courseblueprints\local\blueprint_repository();
+        $repo = new blueprint_repository();
         $id = $repo->create('blueprint-B', 'Original', '', $user->id);
-        $manager = new \local_courseblueprints\local\blueprint_version_manager();
-        $structure = (new \local_courseblueprints\local\course_structure_collector())->from_initial(['sections' => 1]);
-        $manifest = (new \local_courseblueprints\local\dependency_checker())->manifest($structure);
+        $manager = new blueprint_version_manager();
+        $structure = (new course_structure_collector())->from_initial(['sections' => 1]);
+        $manifest = (new dependency_checker())->manifest($structure);
         $v = $manager->create_revision($id, $user->id, $structure, $manifest);
         $manager->set_review($v, true, 'Checked authored source and every setting.');
         $manager->publish($v);
@@ -79,7 +86,7 @@ final class versioning_test extends \advanced_testcase {
      * Fingerprints should not depend on associative insertion order.
      */
     public function test_hash_is_order_invariant_for_associative_objects(): void {
-        $manager = new \local_courseblueprints\local\blueprint_version_manager();
+        $manager = new blueprint_version_manager();
         $this->assertSame(
             $manager::canonical_json(['a' => 1, 'b' => ['z' => 2, 'c' => 3]]),
             $manager::canonical_json(['b' => ['c' => 3, 'z' => 2], 'a' => 1])

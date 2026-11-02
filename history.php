@@ -22,6 +22,8 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\local\execution_history;
+
 require_once(__DIR__ . '/../../config.php');
 
 $id = optional_param('id', 0, PARAM_INT);
@@ -32,7 +34,7 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/courseblueprints/history.php', $id ? ['id' => $id] : []));
 $PAGE->set_title(get_string('history', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('history', 'local_courseblueprints'));
-$history = new \local_courseblueprints\local\execution_history();
+$history = new execution_history();
 $itemstatuses = [
     'queued' => get_string('runstatusqueued', 'local_courseblueprints'),
     'processing' => get_string('runstatusprocessing', 'local_courseblueprints'),

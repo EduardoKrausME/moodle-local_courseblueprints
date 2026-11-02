@@ -22,21 +22,25 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\local\backup_adapter;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\import_export_validator;
+
 require_once(__DIR__ . '/../../config.php');
 
 $id = required_param('id', PARAM_INT);
 $artifact = optional_param('artifact', 0, PARAM_BOOL);
 require_login();
 require_capability('local/courseblueprints:view', context_system::instance());
-$version = (new \local_courseblueprints\local\blueprint_repository())->version($id);
-$blueprint = (new \local_courseblueprints\local\blueprint_repository())->get((int) $version->blueprintid);
+$version = (new blueprint_repository())->version($id);
+$blueprint = (new blueprint_repository())->get((int) $version->blueprintid);
 $name = clean_filename($blueprint->code . '-v' . $version->revision);
 if ($artifact) {
-    $file = (new \local_courseblueprints\local\backup_adapter())->get_artifact($id);
+    $file = (new backup_adapter())->get_artifact($id);
     send_stored_file($file, 0, 0, true);
     exit;
 }
-$json = (new \local_courseblueprints\local\import_export_validator())->export($version);
+$json = (new import_export_validator())->export($version);
 header('Content-Type: application/json; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $name . '.json"');
 header('X-Content-Type-Options: nosniff');

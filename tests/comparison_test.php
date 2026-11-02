@@ -25,6 +25,9 @@
 namespace local_courseblueprints;
 
 
+use advanced_testcase;
+use local_courseblueprints\local\course_comparison_service;
+
 /**
  * Informative, deterministic structural divergence checks.
  *
@@ -33,7 +36,7 @@ namespace local_courseblueprints;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \local_courseblueprints\local\course_comparison_service
  */
-final class comparison_test extends \advanced_testcase {
+final class comparison_test extends advanced_testcase {
     /**
      * Detect changes without attempting course modifications.
      */
@@ -50,7 +53,7 @@ final class comparison_test extends \advanced_testcase {
             ['section' => 1, 'modname' => 'forum', 'name' => 'Discussion'],
             ['section' => 2, 'modname' => 'assign', 'name' => 'Submission'],
         ]];
-        $diff = (new \local_courseblueprints\local\course_comparison_service())->diff($base, $actual);
+        $diff = (new course_comparison_service())->diff($base, $actual);
         $types = array_column($diff, 'type');
         $this->assertContains('section_removed', $types);
         $this->assertContains('section_added', $types);

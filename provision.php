@@ -22,6 +22,12 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_courseblueprints\form\provision_select_form;
+use local_courseblueprints\form\provision_settings_form;
+use local_courseblueprints\local\blueprint_repository;
+use local_courseblueprints\local\dependency_checker;
+use local_courseblueprints\local\provisioning_service;
+
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
@@ -31,8 +37,8 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/courseblueprints/provision.php'));
 $PAGE->set_title(get_string('provision', 'local_courseblueprints'));
 $PAGE->set_heading(get_string('provision', 'local_courseblueprints'));
-$repo = new \local_courseblueprints\local\blueprint_repository();
-$service = new \local_courseblueprints\local\provisioning_service();
+$repo = new blueprint_repository();
+$service = new provisioning_service();
 $step = optional_param('step', 1, PARAM_INT);
 
 if ($step === 3 && optional_param('action', '', PARAM_ALPHA) === 'confirm') {
@@ -61,7 +67,7 @@ if ($step === 3) {
         redirect(new moodle_url('/local/courseblueprints/provision.php'));
     }
     $version = $repo->version($draft['versionid']);
-    $issues = (new \local_courseblueprints\local\dependency_checker())->check(
+    $issues = (new dependency_checker())->check(
         json_decode($version->manifest, true, 512, JSON_THROW_ON_ERROR)
     );
     echo $OUTPUT->header();
@@ -93,7 +99,7 @@ if ($step === 2) {
     if ($version->status !== 'published') {
         throw new moodle_exception('unpublishedversion', 'local_courseblueprints');
     }
-    $form = new \local_courseblueprints\form\provision_settings_form(null, ['versionid' => $versionid]);
+    $form = new provision_settings_form(null, ['versionid' => $versionid]);
     if ($form->is_cancelled()) {
         redirect(new moodle_url('/local/courseblueprints/provision.php'));
     }
@@ -162,7 +168,7 @@ if (!$options) {
         get_string('nopublished', 'local_courseblueprints')
     );
 }
-$form = new \local_courseblueprints\form\provision_select_form(null, ['versions' => $options]);
+$form = new provision_select_form(null, ['versions' => $options]);
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/local/courseblueprints/index.php'));
 }
