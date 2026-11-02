@@ -65,7 +65,8 @@ if ($data = $form->get_data()) {
             }
         }
         $repo = new \local_courseblueprints\local\blueprint_repository();
-        $blueprintid = $repo->create($data->code, $data->name, get_string('importedblueprint', 'local_courseblueprints'), $USER->id);
+        $blueprintid = $repo->create($data->code, $data->name, 
+                                     get_string('importedblueprint', 'local_courseblueprints'), $USER->id);
         $versionid = (new \local_courseblueprints\local\blueprint_version_manager())->create_revision(
             $blueprintid,
             $USER->id,
